@@ -22,6 +22,7 @@ from .yasg import urlpatterns as doc_urls
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('users.urls')),
+    path('chat/', include('chat.urls')),
     path('api/auth/', include('djoser.urls')),  # djoser
     re_path(r'^auth/', include('djoser.urls.authtoken')),  # djoser
 
