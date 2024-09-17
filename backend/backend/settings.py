@@ -32,6 +32,8 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     "daphne",
+    'users',
+    'chat',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -42,10 +44,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'channels',
     'djoser',
-    'users',
-    'chat',
     'corsheaders',
     'drf_yasg',
+
 ]
 
 MIDDLEWARE = [
@@ -79,8 +80,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-ASGI_APPLICATION = "backend.asgi.application"
-
+ASGI_APPLICATION = 'backend.asgi.application'
 
 CHANNEL_LAYERS = {
     'default':{
@@ -91,6 +91,8 @@ CHANNEL_LAYERS = {
     },
 }
 
+
+
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -99,13 +101,6 @@ DATABASES = {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'db.sqlite3',
     }
-}
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
 }
 
 
@@ -149,7 +144,13 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+REST_FRAMEWORK = {}
+
 AUTH_USER_MODEL = 'users.User'
+
+
+
 
 
 REST_FRAMEWORK = {
@@ -169,6 +170,8 @@ REST_FRAMEWORK = {
 }
 # связь с front
 CORS_ORIGIN_ALLOW_ALL = True
+
+DJANGO_CHANNELS_REST_API = {}
 
 # DJOSER = {
 #     'PASSWORD_RESET_CONFIG_URL':'#/password/reset/config/{uid}/{token}',
