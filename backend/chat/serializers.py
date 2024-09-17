@@ -6,7 +6,18 @@ from rest_framework import serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        exlude = ["password"]
+        fields = ["id", "username", "email", "password"]
+        extra_kwargs = {'password': {'write_only': True}}
+
+        def create(self, validated_data):
+            user = User(
+                email=validated_data['email'],
+                username=validated_data['username']
+            )
+            user.set_password(validated_data['password'])
+            user.save()
+            return user
+
 
 class MessageSerializer(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
@@ -15,6 +26,7 @@ class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
         exlude = []
+        fields = '__all__'
         depth = 1
 
     def get_created_at_formatted(self, obj:Message):
