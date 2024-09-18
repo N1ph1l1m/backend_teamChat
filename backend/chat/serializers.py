@@ -21,7 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
-    user = UserSerializer()
+    user = UserSerializer(many=True)
 
     class Meta:
         model = Message

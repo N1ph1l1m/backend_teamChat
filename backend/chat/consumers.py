@@ -78,6 +78,7 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
                 }
             )
 
+
     async def update_users(self, event: dict):
         await self.send(text_data=json.dumps({'usuarios': event["usuarios"]}))
 
