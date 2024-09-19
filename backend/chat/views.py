@@ -46,7 +46,7 @@ class RoomCreate(APIView):
                 # Возвращаем данные о созданной комнате и ссылку
                 return Response({
                     "pk": room.pk,
-                    "name": room.name,
+                    "name": room.name ,
                     "current_users": [user.username for user in room.current_users.all()],  # Возвращаем список пользователей
                     "url": room_url
                 }, status=status.HTTP_201_CREATED)
