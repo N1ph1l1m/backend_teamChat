@@ -38,9 +38,9 @@ class RoomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Room
-        fields = ["pk", "name", "host" , "messages","current_users","last_message"]
+        fields = ["pk", "name", "host" , "message","current_users","last_message"]
         depth = 1
-        read_only_fields = ["messages", "last_messages"]
+        read_only_fields = ["message", "last_message"]
 
     def get_last_message(self, obj:Room):
-        return MessageSerializer(obj.messages.order_by('created_at').last()).data
+        return MessageSerializer(obj.message.order_by('created_at').last()).data
