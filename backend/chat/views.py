@@ -23,42 +23,50 @@ def index(request):
     return render(request, 'chat/index.html')
 
 
-
 class RoomCreate(APIView):
     def post(self, request):
-        name = request.data.get("name")
-        current_users = request.data.get("current_users", [])  # Получаем текущих пользователей, если есть
-        # Проверяем наличие имени
-        if name:
-            if  not Room.objects.filter(name=name).first():
-                # Создаем новую комнату
-                room = Room.objects.create(name=name, host=request.user)
+        # Получаем текущего пользователя (хоста) и выбранного пользователя (собеседника)
+        current_user = request.user
+        other_user_username = request.data.get("current_users", [])  # Ожидается один пользователь
 
-                # Добавляем текущих пользователей в комнату, если они существуют
-                for username in current_users:
-                    user = User.objects.filter(username=username).first()  # Получаем пользователя по имени
-                    if user:
-                        room.current_users.add(user)  # Добавляем пользователя в current_users
+        if not other_user_username:
+            return Response({"error": "Other user is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-                # Подготовка ссылки на созданную комнату
-                room_url = reverse("room", kwargs={"pk": room.pk})
+        other_user = User.objects.filter(username=other_user_username[0]).first()  # Получаем собеседника
 
-                # Возвращаем данные о созданной комнате и ссылку
-                return Response({
-                    "pk": room.pk,
-                    "name": room.name ,
-                    "current_users": [user.username for user in room.current_users.all()],  # Возвращаем список пользователей
-                    "url": room_url
-                }, status=status.HTTP_201_CREATED)
-            else:
-                return Response({"error": "Room with this name already exists"}, status=status.HTTP_400_BAD_REQUEST)
+        if not other_user:
+            return Response({"error": "Other user not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Упорядочиваем пользователей для создания уникального имени комнаты
+        sorted_users = sorted([current_user.username, other_user.username])
+        room_name = f"{sorted_users[0]}_{sorted_users[1]}"  # Например, admin_user1 или user1_admin
+
+        # Проверяем, существует ли уже комната с таким именем
+        room = Room.objects.filter(name=room_name).first()
+
+        if not room:
+            # Если комната не найдена, создаем новую
+            room = Room.objects.create(name=room_name, host=current_user)
+            room.current_users.add(current_user, other_user)  # Добавляем обоих пользователей в комнату
+
+            room_url = reverse("room", kwargs={"pk": room.pk})
+
+            return Response({
+                "pk": room.pk,
+                "name": room.name,
+                "current_users": [user.username for user in room.current_users.all()],
+                "url": room_url
+            }, status=status.HTTP_201_CREATED)
         else:
-            return Response({"error": "Name is required"}, status=status.HTTP_400_BAD_REQUEST)
+            # Если комната уже существует, возвращаем информацию о ней
+            room_url = reverse("room", kwargs={"pk": room.pk})
 
-
-
-
-
+            return Response({
+                "pk": room.pk,
+                "name": room.name,
+                "current_users": [user.username for user in room.current_users.all()],
+                "url": room_url
+            }, status=status.HTTP_200_OK)
 
 
 def room(request, pk):
