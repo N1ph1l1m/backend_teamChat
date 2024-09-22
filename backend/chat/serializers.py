@@ -2,11 +2,10 @@ from chat.models import Room, Message
 from users.models import User
 from rest_framework import serializers
 
-
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username", "email", "password"]
+        fields = ["id", "username"]
         extra_kwargs = {'password': {'write_only': True}}
 
         def create(self, validated_data):
@@ -35,7 +34,8 @@ class MessageSerializer(serializers.ModelSerializer):
 class RoomSerializer(serializers.ModelSerializer):
     last_message = serializers.SerializerMethodField()
     message = MessageSerializer(many = True, read_only = True)
-
+    host = UserSerializer(read_only=True)
+    current_users = UserSerializer(many=True, read_only=True)
     class Meta:
         model = Room
         fields = ["pk", "name", "host" , "message","current_users","last_message"]
@@ -44,3 +44,6 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj:Room):
         return MessageSerializer(obj.message.order_by('created_at').last()).data
+
+
+

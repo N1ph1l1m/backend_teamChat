@@ -1,13 +1,16 @@
 from asgiref.sync import sync_to_async
+from django.contrib.auth import get_user_model
 from django.shortcuts import render, reverse, get_object_or_404
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, ListView
 from django.http import HttpResponseRedirect
 from rest_framework import status
-from chat import serializers
-from .models import User, Room, Message
+from .serializers import RoomSerializer, UserSerializer
+from rest_framework import generics
+from rest_framework.generics import ListAPIView
+from .models import  Room, Message
 from rest_framework.views import APIView
-from rest_framework.response import  Response
 
+from rest_framework.response import  Response
 
 def index(request):
     if request.method == "POST":
@@ -69,11 +72,23 @@ class RoomCreate(APIView):
             }, status=status.HTTP_200_OK)
 
 
+
+class  RoomListView(generics.ListAPIView):
+    queryset = Room.objects.all()
+    serializer_class  = RoomSerializer
+
+class RoomDetailView(generics.RetrieveAPIView):
+    queryset = Room.objects.all()
+    serializer_class = RoomSerializer
+
+
 def room(request, pk):
     room: Room = get_object_or_404(Room, pk=pk)
     return render(request, 'chat/room.html', {
         "room": room,
     })
+
+
 
 
 def test(request):
