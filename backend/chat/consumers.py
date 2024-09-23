@@ -8,7 +8,7 @@ from djangochannelsrestframework.observer.generics import (ObserverModelInstance
 from djangochannelsrestframework.observer import model_observer
 
 from .models import Room, Message
-from users.models import User
+from django.contrib.auth import get_user_model
 from .serializers import MessageSerializer, RoomSerializer, UserSerializer
 
 
@@ -88,12 +88,12 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
 
     @database_sync_to_async
     def remove_user_from_room(self, room):
-        user: User = self.scope["user"]
+        user: get_user_model = self.scope["user"]
         user.current_rooms.remove(room)
 
     @database_sync_to_async
     def add_user_to_room(self, pk):
-        user: User = self.scope["user"]
+        user: get_user_model = self.scope["user"]
         if not user.current_rooms.filter(pk=self.room_subscribe).exists():
             user.current_rooms.add(Room.objects.get(pk=pk))
 
@@ -107,6 +107,5 @@ class UserConsumer(
         mixins.DeleteModelMixin,
         GenericAsyncAPIConsumer,
 ):
-
-    queryset = User.objects.all()
+    queryset = get_user_model().objects.all()
     serializer_class = UserSerializer

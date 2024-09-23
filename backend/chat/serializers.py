@@ -20,7 +20,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class MessageSerializer(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
-    user = UserSerializer(many=True)
+    user = UserSerializer()
 
     class Meta:
         model = Message
