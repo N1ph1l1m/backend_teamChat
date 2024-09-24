@@ -4,7 +4,7 @@ from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.http import HttpResponseRedirect
 from rest_framework import status
-from .serializers import RoomSerializer, UserSerializer
+from .serializers import RoomSerializer, MessageSerializer
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from .models import  Room, Message
@@ -77,18 +77,24 @@ class  RoomListView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class  = RoomSerializer
 
+
 class RoomDetailView(generics.RetrieveAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
+class MessageListView(generics.ListAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
+class MessageDetailView(generics.RetrieveAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
 
 def room(request, pk):
     room: Room = get_object_or_404(Room, pk=pk)
     return render(request, 'chat/room.html', {
         "room": room,
     })
-
-
 
 
 def test(request):
