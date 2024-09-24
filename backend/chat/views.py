@@ -97,7 +97,5 @@ def room(request, pk):
     })
 
 
-
-
 def test(request):
     return render(request, 'chat/test.html')
