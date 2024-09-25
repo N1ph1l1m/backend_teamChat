@@ -7,6 +7,7 @@ from rest_framework import status
 from .serializers import RoomSerializer, MessageSerializer
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
+from django.contrib.auth import get_user_model
 from .models import  Room, Message
 from rest_framework.views import APIView
 
@@ -35,7 +36,7 @@ class RoomCreate(APIView):
         if not other_user_username:
             return Response({"error": "Other user is required"}, status=status.HTTP_400_BAD_REQUEST)
 
-        other_user = User.objects.filter(username=other_user_username[0]).first()  # Получаем собеседника
+        other_user = get_user_model().objects.filter(username=other_user_username[0]).first()  # Получаем собеседника
 
         if not other_user:
             return Response({"error": "Other user not found"}, status=status.HTTP_404_NOT_FOUND)
@@ -71,6 +72,60 @@ class RoomCreate(APIView):
                 "url": room_url
             }, status=status.HTTP_200_OK)
 
+
+class RoomGroupCreate(APIView):
+    def post(self, request):
+        host_user = request.user
+        other_user_usernames = request.data.get("current_users")
+        room_name = request.data.get("name")
+
+        # Проверка на пустое имя хоста
+        if not host_user.username:
+            return Response({"error": "Имя хоста не может быть пустым"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверка на пустое имя комнаты
+        if not room_name:
+            return Response({"error": "Имя комнаты не может быть пустым"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверка на пустой список пользователей
+        if not other_user_usernames:
+            return Response({"error": "Необходимо указать хотя бы одного другого пользователя"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Находим других пользователей по их именам
+        other_users = get_user_model().objects.filter(username__in=other_user_usernames)
+
+        if not other_users.exists():
+            return Response({"error": "Другие пользователи не найдены"}, status=status.HTTP_404_NOT_FOUND)
+
+        # Проверяем, существует ли комната с таким именем
+        room = Room.objects.filter(name=room_name).first()
+
+        if not room:
+            # Если комната не найдена, создаем новую
+            room = Room.objects.create(host=host_user, name=room_name)
+
+            # Добавляем текущего пользователя и других пользователей в комнату
+            room.current_users.add(host_user)
+            room.current_users.add(*other_users)
+
+            room_url = reverse("room", kwargs={"pk": room.pk})
+
+            return Response({
+                "pk": room.pk,
+                "name": room.name,
+                "current_users": [user.username for user in room.current_users.all()],
+                "url": room_url
+            }, status=status.HTTP_201_CREATED)
+        else:
+            # Если комната уже существует, возвращаем информацию о ней
+            room_url = reverse("room", kwargs={"pk": room.pk})
+
+            return Response({
+                "pk": room.pk,
+                "name": room.name,
+                "current_users": [user.username for user in room.current_users.all()],
+                "url": room_url
+            }, status=status.HTTP_200_OK)
 
 
 class  RoomListView(generics.ListAPIView):

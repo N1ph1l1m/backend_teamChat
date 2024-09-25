@@ -8,6 +8,7 @@ urlpatterns = [
     path('room/<int:pk>',views.room,name = 'room'),
     path('index/', views.index, name ='index'),
     path('room/',views.RoomCreate.as_view()),
+    path('roomg/',views.RoomGroupCreate.as_view()),
     path('rooms/',views.RoomListView.as_view(), name = 'roomList'),
     path('rooms/<int:pk>/',views.RoomDetailView.as_view()),
     path('room/message/',views.MessageListView.as_view()),
