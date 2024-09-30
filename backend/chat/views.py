@@ -132,7 +132,6 @@ class  RoomListView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class  = RoomSerializer
 
-
 class RoomDetailView(generics.RetrieveAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
