@@ -39,8 +39,10 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         await database_sync_to_async(Message.objects.create)(
             room=room,
             user=self.scope["user"],
-            text=message
+            text=message,
         )
+
+
 
     @action()
     async def subscribe_to_messages_in_room(self, pk, **kwargs):

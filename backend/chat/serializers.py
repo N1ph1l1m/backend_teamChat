@@ -5,7 +5,7 @@ from rest_framework import serializers
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "username"]
+        fields = ["id", "username","photo"]
         extra_kwargs = {'password': {'write_only': True}}
 
         def create(self, validated_data):
@@ -38,7 +38,7 @@ class RoomSerializer(serializers.ModelSerializer):
     current_users = UserSerializer(many=True, read_only=True)
     class Meta:
         model = Room
-        fields = ["pk", "name", "host" , "message","current_users","last_message"]
+        fields = ["pk", "name", "host" , "current_users" ,"message","last_message"]
         depth = 1
         read_only_fields = ["message", "last_message"]
 
