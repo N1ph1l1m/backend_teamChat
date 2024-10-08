@@ -1,4 +1,4 @@
-from chat.models import Room, Message
+from chat.models import Room, Message, Photo
 from users.models import User
 from rest_framework import serializers
 
@@ -16,6 +16,37 @@ class UserSerializer(serializers.ModelSerializer):
             user.set_password(validated_data['password'])
             user.save()
             return user
+
+
+
+class PhotoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model  = Photo
+        fields = ['id','image','upload_at']
+
+
+class MessageSerializerCreate(serializers.ModelSerializer):
+    created_at_formatted = serializers.SerializerMethodField()
+    user = UserSerializer()
+    photos = PhotoSerializer(many=True,read_only=True)
+    image_files = serializers.ListField(child = serializers.ImageField(write_only = True), write_only = True)
+
+    class Meta:
+        model = Message
+        exlude = []
+        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']
+        depth = 1
+
+    def create(self, validated_data):
+        image_files = validated_data.pop('image_files')
+        message = Message.objects.create(**validated_data)
+        for image_file in image_files:
+            image = Photo.objects.create(file=image_file)
+            message.images.add(image)
+        return message
+
+    def get_created_at_formatted(self, obj:Message):
+        return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
 class MessageSerializer(serializers.ModelSerializer):

@@ -2,11 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from users.models import User
 
-
-
-
-
-
 class Room(models.Model):
     name = models.CharField(max_length=255, null=False, blank=True, unique = True)
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name= "rooms")
