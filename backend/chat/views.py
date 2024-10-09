@@ -4,7 +4,8 @@ from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.http import HttpResponseRedirect
 from rest_framework import status, viewsets
-from .serializers import RoomSerializer, MessageSerializer , MessageSerializerCreate , PhotoSerializer
+# from .serializers import RoomSerializer, MessageSerializer , MessageSerializerCreate , PhotoSerializer
+from .serializers import *
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from django.contrib.auth import get_user_model
@@ -150,47 +151,73 @@ class PhotoUploads(generics.CreateAPIView):
     serializer_class = PhotoSerializer
 
 
+# my
+# class MessageViewSet(viewsets.ModelViewSet):
+#     queryset = Message.objects.all()
+#     serializer_class = MessageSerializerCreate2
+#
+#     def create(self, request, id_room , sender_username,*args, **kwargs):
+#         # Получаем идентификатор комнаты и имя пользователя из URL
+#         room_id = id_room
+#         username = sender_username
+#
+#         # Получаем комнату и пользователя
+#         room = get_object_or_404(Room, pk=room_id)
+#         user = get_object_or_404(get_user_model(), username=username)
+#
+#         # Получаем текст сообщения
+#         text = request.data.get('text', '')
+#
+#         # Получаем файлы изображений
+#         image_files = request.FILES.getlist('images')
+#
+#         # Логируем полученные файлы
+#         logger.info(f"Received files: {image_files}")
+#
+#         # Если файлы не загружены
+#         if not image_files:
+#             return Response({"detail": "No images found"}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         # Создаем сообщение
+#         message = Message.objects.create(room=room, user=user, text=text)
+#
+#         # Сохраняем и добавляем фотографии к сообщению
+#         for image_file in image_files:
+#             photo = Photo.objects.create(image=image_file)
+#             message.photos.add(photo)
+#
+#         # Сохраняем сообщение с прикрепленными фотографиями
+#         message.save()
+#
+#         # Сериализуем и возвращаем ответ
+#         serializer = self.get_serializer(message)
+#         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()
-    serializer_class = MessageSerializerCreate
+    serializer_class = MessageSerializerCreate2
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request, id_room, sender_username, *args, **kwargs):
         # Получаем идентификатор комнаты и имя пользователя из URL
-        room_id = self.kwargs.get('pk')
-        username = self.kwargs.get('username')
-
-        # Получаем комнату и пользователя
-        room = get_object_or_404(Room, pk=room_id)
-        user = get_object_or_404(get_user_model(), username=username)
+        room = get_object_or_404(Room, pk=id_room)
+        user = get_object_or_404(get_user_model(), username=sender_username)
 
         # Получаем текст сообщения
         text = request.data.get('text', '')
-
         # Получаем файлы изображений
-        image_files = request.FILES.getlist('images')
-
-        # Логируем полученные файлы
-        logger.info(f"Received files: {image_files}")
-
-        # Если файлы не загружены
-        if not image_files:
-            return Response({"detail": "No images found"}, status=status.HTTP_400_BAD_REQUEST)
+        image_file = request.FILES.get('image')
 
         # Создаем сообщение
-        message = Message.objects.create(room=room, user=user, text=text)
+        message = Message.objects.create(room=room, user=user, text=text, image=image_file)
 
-        # Сохраняем и добавляем фотографии к сообщению
-        for image_file in image_files:
-            photo = Photo.objects.create(image=image_file)
-            message.photos.add(photo)
-
-        # Сохраняем сообщение с прикрепленными фотографиями
-        message.save()
-
-        # Сериализуем и возвращаем ответ
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+
+
+
 
 def room(request, pk):
     room: Room = get_object_or_404(Room, pk=pk)

@@ -34,12 +34,13 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
         await self.remove_user_from_room(pk)
 
     @action()
-    async def create_message(self, message, **kwargs):
+    async def create_message(self, message=None, image = None, **kwargs):
         room: Room = await self.get_room(pk=self.room_subscribe)
         await database_sync_to_async(Message.objects.create)(
             room=room,
             user=self.scope["user"],
-            text=message
+            text=message,
+            image = image,
         )
 
 

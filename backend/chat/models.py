@@ -27,7 +27,7 @@ class Message(models.Model):
     text = models.TextField(max_length=5000,blank=True)
     user = models.ForeignKey(User,on_delete=models.CASCADE,  related_name="messages")
     created_at = models.DateTimeField(auto_now_add = True)
-    photos = models.ManyToManyField(Photo,blank=True,related_name='messages')
+    image = models.ImageField(upload_to=room_photo_path, blank=True)
 
     def __str__(self):
         return f"Message({self.user}{self.room})"

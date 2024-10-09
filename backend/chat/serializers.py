@@ -1,4 +1,5 @@
 from chat.models import Room, Message, Photo
+from django.contrib.auth import get_user_model
 from users.models import User
 from rest_framework import serializers
 
@@ -19,24 +20,31 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
+
+class UserSer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id','username']
+
+
+
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
-        model  = Photo
+        model = Photo
         fields = ['id','image','upload_at']
 
 
 class MessageSerializerCreate(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
-    user = UserSerializer()
+    user = UserSer()
     photos = PhotoSerializer(many=True,read_only=True)
     image_files = serializers.ListField(child = serializers.ImageField(write_only = True), write_only = True)
 
     class Meta:
         model = Message
-        exlude = []
-        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']
+        exclude = []
+        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']  # добавлено 'user'
         depth = 1
-
     def create(self, validated_data):
         image_files = validated_data.pop('image_files')
         message = Message.objects.create(**validated_data)
@@ -47,6 +55,40 @@ class MessageSerializerCreate(serializers.ModelSerializer):
 
     def get_created_at_formatted(self, obj:Message):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+
+
+#my
+# class MessageSerializerCreate2(serializers.ModelSerializer):
+#     created_at_formatted = serializers.SerializerMethodField()
+#     user = UserSerializer()
+#     photo = PhotoSerializer()
+#
+#     class Meta:
+#         model = Message
+#         exclude = []
+#         field = ['user','photo', 'text' , 'created_at_formatted ']
+#         depth = 1
+#
+#     def get_created_at_formatted(self, obj:Message):
+#         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+
+
+
+class MessageSerializerCreate2(serializers.ModelSerializer):
+    created_at_formatted = serializers.SerializerMethodField()
+    user = UserSerializer()
+
+    class Meta:
+        model = Message
+        exlude = []
+        fields = '__all__'
+        #fields = ['user', 'text', 'image' ,'created_at_formatted']  # Все необходимые поля для сообщения
+        depth = 1
+
+    def get_created_at_formatted(self, obj: Message):
+        # Форматируем дату создания
+        return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+
 
 
 class MessageSerializer(serializers.ModelSerializer):
