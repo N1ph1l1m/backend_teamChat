@@ -1,11 +1,13 @@
 import json
 
+from django.conf import settings
 from asgiref.sync import sync_to_async
 from channels.db import database_sync_to_async
 from djangochannelsrestframework.generics import GenericAsyncAPIConsumer
 from djangochannelsrestframework import mixins
 from djangochannelsrestframework.observer.generics import (ObserverModelInstanceMixin, action)
 from djangochannelsrestframework.observer import model_observer
+from rest_framework import request
 
 from .models import Room, Message
 from django.contrib.auth import get_user_model
@@ -42,8 +44,6 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
             text=message,
             image = image,
         )
-
-
 
     @action()
     async def subscribe_to_messages_in_room(self, pk, **kwargs):
