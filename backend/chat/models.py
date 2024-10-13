@@ -24,7 +24,7 @@ class Photo(models.Model):
 
 class Message(models.Model):
     room = models.ForeignKey("chat.Room", on_delete= models.CASCADE, related_name="message")
-    text = models.TextField(max_length=5000,blank=True)
+    text = models.TextField(max_length=5000,blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.CASCADE,  related_name="messages")
     created_at = models.DateTimeField(auto_now_add = True)
     image = models.ImageField(upload_to='room_photo_path/', blank=True)

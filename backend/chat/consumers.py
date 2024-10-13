@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from .serializers import MessageSerializer, RoomSerializer, UserSerializer
 
 
-class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
+class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.ListModelMixin):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     lookup_field = "pk"
@@ -35,14 +35,40 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer):
     async def leave_room(self, pk, **kwargs):
         await self.remove_user_from_room(pk)
 
+    # @action()
+    # async def create_message(self, message=None, image = None, **kwargs):
+    #     room: Room = await self.get_room(pk=self.room_subscribe)
+    #     await database_sync_to_async(Message.objects.create)(
+    #         room=room,
+    #         user=self.scope["user"],
+    #         text=message,
+    #         image = image,
+    #     )
+
     @action()
-    async def create_message(self, message=None, image = None, **kwargs):
+    async def create_message(self, message=None, image=None, **kwargs):
         room: Room = await self.get_room(pk=self.room_subscribe)
+        user = self.scope["user"]
+
+        # Проверка на дубликаты сообщений
+        last_message = await database_sync_to_async(
+            Message.objects.filter(room=room, user=user).order_by('-created_at').first
+        )()
+
+        # Убедитесь, что сохраняется относительный путь к изображению
+        if image and image.startswith('http'):
+            image = image.split('/media/')[-1]
+
+        if last_message and last_message.text == message and last_message.image == image:
+            # Сообщение уже создано
+            return
+
+        # Создаем новое сообщение
         await database_sync_to_async(Message.objects.create)(
             room=room,
-            user=self.scope["user"],
+            user=user,
             text=message,
-            image = image,
+            image=image,
         )
 
     @action()
