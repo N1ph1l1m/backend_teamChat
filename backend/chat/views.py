@@ -199,7 +199,6 @@ class MessageViewSet(viewsets.ModelViewSet):
     serializer_class = MessageSerializerCreate2
 
     def create(self, request, id_room, sender_username, *args, **kwargs):
-        # Получаем идентификатор комнаты и имя пользователя из URL
         room = get_object_or_404(Room, pk=id_room)
         user = get_object_or_404(get_user_model(), username=sender_username)
 
@@ -208,7 +207,6 @@ class MessageViewSet(viewsets.ModelViewSet):
         # Получаем файлы изображений
         image_file = request.FILES.get('image')
 
-        # Создаем сообщение
         message = Message.objects.create(room=room, user=user, text=text, image=image_file)
 
         serializer = self.get_serializer(message)
