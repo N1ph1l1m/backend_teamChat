@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Message, Room, Photo
+from .models import Message, Room, Photos
 
 # Register your models here.
 
@@ -31,5 +31,5 @@ class MessageAdmin(admin.ModelAdmin):
 
 # Регистрируем модели и их админ-классы
 admin.site.register(Room, RoomAdmin)
-admin.site.register(Photo,PhotoAdmin)
+admin.site.register(Photos,PhotoAdmin)
 admin.site.register(Message, MessageAdmin)

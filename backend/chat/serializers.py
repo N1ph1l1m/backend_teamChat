@@ -1,4 +1,4 @@
-from chat.models import Room, Message, Photo
+from chat.models import Room, Message, Photos
 from django.contrib.auth import get_user_model
 from users.models import User
 from rest_framework import serializers
@@ -30,8 +30,11 @@ class UserSer(serializers.ModelSerializer):
 
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Photo
+        model = Photos
         fields = ['id','image','upload_at']
+
+class MultiplePhotoSerializer(serializers.Serializer):
+    images = serializers.ListField(child=serializers.ImageField())
 
 
 class MessageSerializerCreate(serializers.ModelSerializer):
@@ -49,7 +52,7 @@ class MessageSerializerCreate(serializers.ModelSerializer):
         image_files = validated_data.pop('image_files')
         message = Message.objects.create(**validated_data)
         for image_file in image_files:
-            image = Photo.objects.create(file=image_file)
+            image = Photos.objects.create(file=image_file)
             message.images.add(image)
         return message
 
@@ -97,7 +100,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        exlude = []
+        exсlude = []
         fields = '__all__'
         depth = 1
 

@@ -15,8 +15,8 @@ def room_photo_path(instance, filename):
     return f'media/photos_rooms/{filename}'
 
 
-class Photo(models.Model):
-    image = models.ImageField(upload_to=room_photo_path)
+class Photos(models.Model):
+    image = models.ImageField(upload_to='room_photo_path/', blank=True)
     upload_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -27,7 +27,7 @@ class Message(models.Model):
     text = models.TextField(max_length=5000,blank=True, null=True)
     user = models.ForeignKey(User,on_delete=models.CASCADE,  related_name="messages")
     created_at = models.DateTimeField(auto_now_add = True)
-    image = models.ImageField(upload_to='room_photo_path/', blank=True)
+    images = models.ManyToManyField(Photos, related_name="photos")
 
     def __str__(self):
         return f"Message({self.user}{self.room})"
