@@ -99,6 +99,35 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
     #         # Добавляем изображения к сообщению
     #         await database_sync_to_async(new_message.images.set)(processed_images)
 
+    # @action()
+    # async def create_message(self, message=None, images=None, **kwargs):
+    #     room: Room = await self.get_room(pk=self.room_subscribe)
+    #     user = self.scope["user"]
+    #
+    #     # Проверка на дубликаты сообщений
+    #     last_message = await database_sync_to_async(
+    #         Message.objects.filter(room=room, user=user).order_by('-created_at').first
+    #     )()
+    #
+    #     if last_message:
+    #         last_message_images = await database_sync_to_async(lambda: list(last_message.images.all()))()
+    #         if last_message.text == message and last_message_images == images:
+    #             # Сообщение уже создано
+    #             return
+    #
+    #     # Создаем новое сообщение без изображений
+    #     new_message = await database_sync_to_async(Message.objects.create)(
+    #         room=room,
+    #         user=user,
+    #         text=message,
+    #     )
+    #
+    #     # Добавляем изображения после создания сообщения
+    #     if images:
+    #         # Предполагаем, что 'images' - это список ID фотографий
+    #         photos = await database_sync_to_async(Photos.objects.filter)(id__in=images)
+    #         await database_sync_to_async(new_message.images.set)(photos)
+
     @action()
     async def create_message(self, message=None, images=None, **kwargs):
         room: Room = await self.get_room(pk=self.room_subscribe)
@@ -115,18 +144,31 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
                 # Сообщение уже создано
                 return
 
-        # Создаем новое сообщение без изображений
+        # Создаем новое сообщение
         new_message = await database_sync_to_async(Message.objects.create)(
             room=room,
             user=user,
             text=message,
         )
 
-        # Добавляем изображения после создания сообщения
+        # Если есть изображения, добавляем их
         if images:
             # Предполагаем, что 'images' - это список ID фотографий
-            photos = await database_sync_to_async(Photos.objects.filter)(id__in=images)
+            photos = await database_sync_to_async(lambda: Photos.objects.filter(id__in=images))()
             await database_sync_to_async(new_message.images.set)(photos)
+        #
+        # # Отправляем обратно созданное сообщение с изображениями
+        # await self.send_json({
+        #     'action': 'message_created',
+        #     'message': {
+        #         'id': new_message.id,
+        #         'text': new_message.text,
+        #         'room': new_message.room.id,
+        #         'user': user.username,
+        #         'images': [photo.image.url for photo in photos],  # Предполагаем, что у вас есть поле 'image'
+        #         'created_at': new_message.created_at.isoformat(),  # Преобразуем дату в строку
+        #     }
+        # })
 
     @action()
     async def subscribe_to_messages_in_room(self, pk, **kwargs):

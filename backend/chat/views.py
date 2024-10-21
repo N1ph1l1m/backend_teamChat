@@ -206,13 +206,23 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         # Получаем текст сообщения
         text = request.data.get('text', '')
-        # Получаем файлы изображений
-        image_file = request.FILES.get('image')
 
-        message = Message.objects.create(room=room, user=user, text=text, image=image_file)
+        # Получаем список идентификаторов изображений
+        image_ids = request.data.get('image', [])
+        if isinstance(image_ids, str):
+            image_ids = image_ids.split(',')  # Преобразуем строку в список, если это необходимо
+
+        # Создаем сообщение
+        message = Message.objects.create(room=room, user=user, text=text)
+
+        # Если есть изображения, связываем их с сообщением
+        if image_ids:
+            photos = Photos.objects.filter(id__in=image_ids)  # Получаем все изображения по id
+            message.images.set(photos)  # Используем set для ManyToMany отношения
 
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
 
 
 def room(request, pk):
