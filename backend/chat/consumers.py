@@ -9,7 +9,7 @@ from djangochannelsrestframework.observer.generics import (ObserverModelInstance
 from djangochannelsrestframework.observer import model_observer
 from rest_framework import request
 
-from .models import Room, Message, Photos
+from .models import Room, Message, Photos , Documents
 from django.contrib.auth import get_user_model
 from .serializers import MessageSerializer, RoomSerializer, UserSerializer
 
@@ -129,7 +129,7 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
     #         await database_sync_to_async(new_message.images.set)(photos)
 
     @action()
-    async def create_message(self, message=None, images=None, **kwargs):
+    async def create_message(self, message=None, images=None, documents = None ,  **kwargs):
         room: Room = await self.get_room(pk=self.room_subscribe)
         user = self.scope["user"]
 
@@ -141,7 +141,11 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
         if last_message:
             last_message_images = await database_sync_to_async(lambda: list(last_message.images.all()))()
             if last_message.text == message and last_message_images == images:
-                # Сообщение уже создано
+                return
+
+        if last_message:
+            last_message_documents = await database_sync_to_async(lambda: list(last_message.documents.all()))()
+            if last_message.text == message and last_message_documents == documents:
                 return
 
         # Создаем новое сообщение
@@ -156,19 +160,11 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
             # Предполагаем, что 'images' - это список ID фотографий
             photos = await database_sync_to_async(lambda: Photos.objects.filter(id__in=images))()
             await database_sync_to_async(new_message.images.set)(photos)
-        #
-        # # Отправляем обратно созданное сообщение с изображениями
-        # await self.send_json({
-        #     'action': 'message_created',
-        #     'message': {
-        #         'id': new_message.id,
-        #         'text': new_message.text,
-        #         'room': new_message.room.id,
-        #         'user': user.username,
-        #         'images': [photo.image.url for photo in photos],  # Предполагаем, что у вас есть поле 'image'
-        #         'created_at': new_message.created_at.isoformat(),  # Преобразуем дату в строку
-        #     }
-        # })
+
+        if documents:
+            # Предполагаем, что 'images' - это список ID фотографий
+            document = await database_sync_to_async(lambda: Documents.objects.filter(id__in=documents))()
+            await database_sync_to_async(new_message.documents.set)(document)
 
     @action()
     async def subscribe_to_messages_in_room(self, pk, **kwargs):
@@ -217,7 +213,7 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
     @database_sync_to_async
     def remove_user_from_room(self, room):
         user: get_user_model = self.scope["user"]
-        user.current_rooms.remove(room)
+        # user.current_rooms.remove(room)
 
     @database_sync_to_async
     def add_user_to_room(self, pk):

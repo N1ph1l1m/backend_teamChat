@@ -9,7 +9,7 @@ from .serializers import *
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from django.contrib.auth import get_user_model
-from .models import  Room, Message, Photos
+from .models import  Room, Message, Photos , Documents
 from rest_framework.views import APIView
 import logging
 logger = logging.getLogger(__name__)
@@ -149,6 +149,12 @@ class MessageDetailView(generics.RetrieveAPIView):
 class PhotoUploads(generics.CreateAPIView):
     queryset = Photos.objects.all()
     serializer_class = PhotoSerializer
+
+
+class DocumentsUploads(generics.CreateAPIView):
+    queryset = Documents.objects.all()
+    serializer_class = DocumentsSerializer
+
 
 
 

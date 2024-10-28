@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Message, Room, Photos
+from .models import Message, Room, Photos, Documents
 
 # Register your models here.
 
@@ -24,6 +24,10 @@ class RoomAdmin(admin.ModelAdmin):
 class PhotoAdmin(admin.ModelAdmin):
     list_display = ('id','image')
 
+class DocumentAdmin(admin.ModelAdmin):
+    list_display = ('id','document')
+
+
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'room', 'user', 'text', 'created_at')  # Пример полей, отображаемых в админке
     search_fields = ('text',)  # Поля, по которым можно выполнять поиск
@@ -32,4 +36,5 @@ class MessageAdmin(admin.ModelAdmin):
 # Регистрируем модели и их админ-классы
 admin.site.register(Room, RoomAdmin)
 admin.site.register(Photos,PhotoAdmin)
+admin.site.register(Documents,DocumentAdmin)
 admin.site.register(Message, MessageAdmin)

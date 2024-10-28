@@ -1,4 +1,4 @@
-from chat.models import Room, Message, Photos
+from chat.models import Room, Message, Photos , Documents
 from django.contrib.auth import get_user_model
 from users.models import User
 from rest_framework import serializers
@@ -33,20 +33,32 @@ class PhotoSerializer(serializers.ModelSerializer):
         model = Photos
         fields = ['id','image','upload_at']
 
+class DocumentsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Documents
+        fields = ['id','document','upload_at']
+
+
 class MultiplePhotoSerializer(serializers.Serializer):
     images = serializers.ListField(child=serializers.ImageField())
+
+
+class MultipleDocumentSerializer(serializers.Serializer):
+    images = serializers.ListField(child=serializers.FileField())
 
 
 class MessageSerializerCreate(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
     user = UserSer()
     photos = PhotoSerializer(many=True,read_only=True)
+    document = DocumentsSerializer(many=True,read_only=True)
     image_files = serializers.ListField(child = serializers.ImageField(write_only = True), write_only = True)
+    document_files = serializers.ListField(child=serializers.FileField(write_only=True), write_only=True)
 
     class Meta:
         model = Message
         exclude = []
-        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']  # добавлено 'user'
+        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']
         depth = 1
     def create(self, validated_data):
         image_files = validated_data.pop('image_files')
@@ -58,22 +70,6 @@ class MessageSerializerCreate(serializers.ModelSerializer):
 
     def get_created_at_formatted(self, obj:Message):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
-
-
-#my
-# class MessageSerializerCreate2(serializers.ModelSerializer):
-#     created_at_formatted = serializers.SerializerMethodField()
-#     user = UserSerializer()
-#     photo = PhotoSerializer()
-#
-#     class Meta:
-#         model = Message
-#         exclude = []
-#         field = ['user','photo', 'text' , 'created_at_formatted ']
-#         depth = 1
-#
-#     def get_created_at_formatted(self, obj:Message):
-#         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
 

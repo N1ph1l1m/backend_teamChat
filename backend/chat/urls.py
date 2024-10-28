@@ -13,8 +13,9 @@ urlpatterns = [
     path('rooms/<int:pk>/',views.RoomDetailView.as_view()),
     path('room/message/',views.MessageListView.as_view()),
     path('photo-upload/', views.PhotoUploads.as_view()),
+    path('documents-upload/', views.DocumentsUploads.as_view()),
     path('room/message/<int:pk>', views.MessageDetailView.as_view()),
-    path('room/<int:pk>/create/message/', views.MessageViewSet.as_view({'post': 'create'})),
-    path('room/<int:id_room>/user/<str:sender_username>/message/', views.MessageViewSet.as_view({'post': 'create'})),
+    # path('room/<int:pk>/create/message/', views.MessageViewSet.as_view({'post': 'create'})),
+    # path('room/<int:id_room>/user/<str:sender_username>/message/', views.MessageViewSet.as_view({'post': 'create'})),
 
 ]
