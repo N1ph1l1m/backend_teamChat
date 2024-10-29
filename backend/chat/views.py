@@ -155,6 +155,10 @@ class DocumentsUploads(generics.CreateAPIView):
     queryset = Documents.objects.all()
     serializer_class = DocumentsSerializer
 
+class DocumentsList(generics.ListAPIView):
+    queryset = Documents.objects.all()
+    serializer_class = DocumentsSerializer
+
 
 
 

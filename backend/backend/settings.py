@@ -24,6 +24,8 @@ SECRET_KEY = 'django-insecure-g451uwfbjn9oke!^22sa*l^#fmo!p2144@r)!552s5pp@b*ep9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
+FILE_UPLOAD_PERMISSIONS = 0o644
+FILE_CHARSET = 'utf-8'
 
 ALLOWED_HOSTS = []
 
