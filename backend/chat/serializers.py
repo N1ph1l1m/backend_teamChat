@@ -36,7 +36,7 @@ class PhotoSerializer(serializers.ModelSerializer):
 class DocumentsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Documents
-        fields = ['id','document','upload_at']
+        fields = ['id','document', 'name' , 'upload_at']
 
 
 class MultiplePhotoSerializer(serializers.Serializer):

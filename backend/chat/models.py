@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from users.models import User
+import os
 
 class Room(models.Model):
     name = models.CharField(max_length=255, null=False, blank=True, unique = True)
@@ -25,7 +26,14 @@ class Photos(models.Model):
 
 class Documents(models.Model):
     document = models.FileField(upload_to='room_file_path/', blank=True)
+    name = models.CharField(max_length=255, blank=True)
     upload_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        # Если поле name пустое, устанавливаем только имя файла без пути
+        if self.document and not self.name:
+            self.name = os.path.basename(self.document.name)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"Document({self.id})"
