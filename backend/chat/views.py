@@ -1,8 +1,11 @@
+import os
+from fileinput import filename
+
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic import TemplateView, ListView
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404, FileResponse
 from rest_framework import status, viewsets
 # from .serializers import RoomSerializer, MessageSerializer , MessageSerializerCreate , PhotoSerializer
 from .serializers import *
@@ -14,6 +17,8 @@ from rest_framework.views import APIView
 import logging
 logger = logging.getLogger(__name__)
 from rest_framework.response import  Response
+from urllib.parse import unquote
+import urllib.parse
 
 def index(request):
     if request.method == "POST":
@@ -138,6 +143,62 @@ class RoomDetailView(generics.RetrieveAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
+# class DocumentDetail(APIView):
+#     def get(self, request, pk, *args, **kwargs):
+#         try:
+#             # Получаем объект документа
+#             document = Documents.objects.get(pk=pk)
+#             file_path = document.document.path  # Предполагается, что поле называется `document`
+#
+#             # Проверяем, существует ли файл
+#             if not os.path.exists(file_path):
+#                 raise Http404("Файл не найден")
+#
+#             # Кодируем имя файла для поддержки юникода
+#             filename = document.document.path
+#             encoded_filename = urllib.parse.quote(filename)
+#
+#             # Создаем ответ с файлом
+#             response = FileResponse(open(file_path, 'rb'))
+#             response[
+#                 'Content-Disposition'] = f'attachment; filename="{filename}";'
+#             response['Content-Type'] = 'application/octet-stream'  # Заставляем файл скачиваться
+#
+#             return response
+#
+#         except Documents.DoesNotExist:
+#             raise Http404("Документ не найден")
+
+
+
+#
+class DocumentDetail(APIView):
+    def get(self, request, pk, filename, *args, **kwargs):
+        try:
+            # Получаем объект документа
+            document = Documents.objects.get(pk=pk)
+            file_path = document.document.path  # Путь к файлу
+            name = unquote(filename)  # Декодируем имя файла
+
+            # Проверяем расширение файла, если это .txt, меняем имя на "file.txt"
+            if name.lower().endswith(".txt"):
+                name =  "TextEdit.txt"
+
+            # Проверяем, существует ли файл
+            if not os.path.exists(file_path):
+                raise Http404("Файл не найден")
+
+            # Создаем ответ с файлом
+            response = FileResponse(open(file_path, 'rb'))
+            response['Content-Disposition'] = f'attachment; filename="{name}"'  # Указываем имя файла
+            response['Content-Type'] = 'application/octet-stream'  # Указываем тип файла как бинарный
+
+            return response
+
+        except Documents.DoesNotExist:
+            raise Http404("Документ не найден")
+
+
 class MessageListView(generics.ListAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
@@ -161,49 +222,6 @@ class DocumentsList(generics.ListAPIView):
 
 
 
-
-
-# my
-# class MessageViewSet(viewsets.ModelViewSet):
-#     queryset = Message.objects.all()
-#     serializer_class = MessageSerializerCreate2
-#
-#     def create(self, request, id_room , sender_username,*args, **kwargs):
-#         # Получаем идентификатор комнаты и имя пользователя из URL
-#         room_id = id_room
-#         username = sender_username
-#
-#         # Получаем комнату и пользователя
-#         room = get_object_or_404(Room, pk=room_id)
-#         user = get_object_or_404(get_user_model(), username=username)
-#
-#         # Получаем текст сообщения
-#         text = request.data.get('text', '')
-#
-#         # Получаем файлы изображений
-#         image_files = request.FILES.getlist('images')
-#
-#         # Логируем полученные файлы
-#         logger.info(f"Received files: {image_files}")
-#
-#         # Если файлы не загружены
-#         if not image_files:
-#             return Response({"detail": "No images found"}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         # Создаем сообщение
-#         message = Message.objects.create(room=room, user=user, text=text)
-#
-#         # Сохраняем и добавляем фотографии к сообщению
-#         for image_file in image_files:
-#             photo = Photo.objects.create(image=image_file)
-#             message.photos.add(photo)
-#
-#         # Сохраняем сообщение с прикрепленными фотографиями
-#         message.save()
-#
-#         # Сериализуем и возвращаем ответ
-#         serializer = self.get_serializer(message)
-#         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class MessageViewSet(viewsets.ModelViewSet):

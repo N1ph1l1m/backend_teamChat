@@ -16,6 +16,7 @@ urlpatterns = [
     path('docs/', views.DocumentsList.as_view()),
     path('documents-upload/', views.DocumentsUploads.as_view()),
     path('room/message/<int:pk>', views.MessageDetailView.as_view()),
+    path('docs/<int:pk>/<str:filename>/',views.DocumentDetail.as_view()),
     # path('room/<int:pk>/create/message/', views.MessageViewSet.as_view({'post': 'create'})),
     # path('room/<int:id_room>/user/<str:sender_username>/message/', views.MessageViewSet.as_view({'post': 'create'})),
 
