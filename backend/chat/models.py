@@ -45,6 +45,7 @@ class Message(models.Model):
     created_at = models.DateTimeField(auto_now_add = True)
     images = models.ManyToManyField(Photos, related_name="photos")
     documents = models.ManyToManyField(Documents,related_name="documents")
+    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name="replies")
 
     def __str__(self):
         return f"Message({self.user}{self.room})"

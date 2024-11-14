@@ -17,8 +17,8 @@ from rest_framework.views import APIView
 import logging
 logger = logging.getLogger(__name__)
 from rest_framework.response import  Response
-from urllib.parse import unquote
 import urllib.parse
+from urllib.parse import quote
 
 def index(request):
     if request.method == "POST":
@@ -133,8 +133,6 @@ class RoomGroupCreate(APIView):
                 "current_users": [user.username for user in room.current_users.all()],
                 "url": room_url
             }, status=status.HTTP_200_OK)
-
-
 class  RoomListView(generics.ListAPIView):
     queryset = Room.objects.all()
     serializer_class  = RoomSerializer
@@ -143,55 +141,24 @@ class RoomDetailView(generics.RetrieveAPIView):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
-# class DocumentDetail(APIView):
-#     def get(self, request, pk, *args, **kwargs):
-#         try:
-#             # Получаем объект документа
-#             document = Documents.objects.get(pk=pk)
-#             file_path = document.document.path  # Предполагается, что поле называется `document`
-#
-#             # Проверяем, существует ли файл
-#             if not os.path.exists(file_path):
-#                 raise Http404("Файл не найден")
-#
-#             # Кодируем имя файла для поддержки юникода
-#             filename = document.document.path
-#             encoded_filename = urllib.parse.quote(filename)
-#
-#             # Создаем ответ с файлом
-#             response = FileResponse(open(file_path, 'rb'))
-#             response[
-#                 'Content-Disposition'] = f'attachment; filename="{filename}";'
-#             response['Content-Type'] = 'application/octet-stream'  # Заставляем файл скачиваться
-#
-#             return response
-#
-#         except Documents.DoesNotExist:
-#             raise Http404("Документ не найден")
-
-
-
-#
 class DocumentDetail(APIView):
     def get(self, request, pk, filename, *args, **kwargs):
         try:
             # Получаем объект документа
             document = Documents.objects.get(pk=pk)
             file_path = document.document.path  # Путь к файлу
-            name = unquote(filename)  # Декодируем имя файла
-
-            # Проверяем расширение файла, если это .txt, меняем имя на "file.txt"
-            if name.lower().endswith(".txt"):
-                name =  "TextEdit.txt"
 
             # Проверяем, существует ли файл
             if not os.path.exists(file_path):
                 raise Http404("Файл не найден")
 
+            # Кодируем имя файла для поддержки русских символов
+            encoded_filename = quote(filename)
+
             # Создаем ответ с файлом
             response = FileResponse(open(file_path, 'rb'))
-            response['Content-Disposition'] = f'attachment; filename="{name}"'  # Указываем имя файла
-            response['Content-Type'] = 'application/octet-stream'  # Указываем тип файла как бинарный
+            response['Content-Disposition'] = f'attachment; filename*=UTF-8\'\'{encoded_filename}'
+            response['Content-Type'] = 'application/octet-stream'
 
             return response
 
