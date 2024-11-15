@@ -38,16 +38,22 @@ class Documents(models.Model):
     def __str__(self):
         return f"Document({self.id})"
 
+
+
 class Message(models.Model):
-    room = models.ForeignKey("chat.Room", on_delete= models.CASCADE, related_name="message")
-    text = models.TextField(max_length=5000,blank=True, null=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE,  related_name="messages")
-    created_at = models.DateTimeField(auto_now_add = True)
-    images = models.ManyToManyField(Photos, related_name="photos")
-    documents = models.ManyToManyField(Documents,related_name="documents")
-    reply_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL, related_name="replies")
+    room = models.ForeignKey("chat.Room", on_delete=models.CASCADE, related_name="message")
+    text = models.TextField(max_length=5000, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
+    created_at = models.DateTimeField(auto_now_add=True)
+    images = models.ManyToManyField(Photos, related_name="photos", blank=True)
+    documents = models.ManyToManyField(Documents, related_name="documents", blank=True)
+    reply_to = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies'
+    )
 
     def __str__(self):
-        return f"Message({self.user}{self.room})"
+        reply_info = f" (reply to {self.reply_to.id})" if self.reply_to else ""
+        return f"Message({self.user}, {self.room}, {self.text[:20]}{reply_info})"
+
 
 

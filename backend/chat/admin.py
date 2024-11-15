@@ -38,3 +38,4 @@ admin.site.register(Room, RoomAdmin)
 admin.site.register(Photos,PhotoAdmin)
 admin.site.register(Documents,DocumentAdmin)
 admin.site.register(Message, MessageAdmin)
+
