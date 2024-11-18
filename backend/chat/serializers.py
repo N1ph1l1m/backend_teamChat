@@ -47,29 +47,29 @@ class MultipleDocumentSerializer(serializers.Serializer):
     images = serializers.ListField(child=serializers.FileField())
 
 
-class MessageSerializerCreate(serializers.ModelSerializer):
-    created_at_formatted = serializers.SerializerMethodField()
-    user = UserSer()
-    photos = PhotoSerializer(many=True,read_only=True)
-    document = DocumentsSerializer(many=True,read_only=True)
-    image_files = serializers.ListField(child = serializers.ImageField(write_only = True), write_only = True)
-    document_files = serializers.ListField(child=serializers.FileField(write_only=True), write_only=True)
-
-    class Meta:
-        model = Message
-        exclude = []
-        fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']
-        depth = 1
-    def create(self, validated_data):
-        image_files = validated_data.pop('image_files')
-        message = Message.objects.create(**validated_data)
-        for image_file in image_files:
-            image = Photos.objects.create(file=image_file)
-            message.images.add(image)
-        return message
-
-    def get_created_at_formatted(self, obj:Message):
-        return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+# class MessageSerializerCreate(serializers.ModelSerializer):
+#     created_at_formatted = serializers.SerializerMethodField()
+#     user = UserSer()
+#     photos = PhotoSerializer(many=True,read_only=True)
+#     document = DocumentsSerializer(many=True,read_only=True)
+#     image_files = serializers.ListField(child = serializers.ImageField(write_only = True), write_only = True)
+#     document_files = serializers.ListField(child=serializers.FileField(write_only=True), write_only=True)
+#
+#     class Meta:
+#         model = Message
+#         exclude = []
+#         fields = ['id', 'room', 'text', 'user', 'created_at_formatted', 'photos', 'image_files']
+#         depth = 1
+#     def create(self, validated_data):
+#         image_files = validated_data.pop('image_files')
+#         message = Message.objects.create(**validated_data)
+#         for image_file in image_files:
+#             image = Photos.objects.create(file=image_file)
+#             message.images.add(image)
+#         return message
+#
+#     def get_created_at_formatted(self, obj:Message):
+#         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
 
@@ -79,7 +79,6 @@ class MessageSerializerCreate2(serializers.ModelSerializer):
 
     class Meta:
         model = Message
-        exlude = []
         fields = '__all__'
         #fields = ['user', 'text', 'image' ,'created_at_formatted']  # Все необходимые поля для сообщения
         depth = 1
@@ -89,14 +88,24 @@ class MessageSerializerCreate2(serializers.ModelSerializer):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
+class ReplyToSerializer(serializers.ModelSerializer):
+    user = UserSerializer()  # Пользователь, написавший ответ
+    images = PhotoSerializer(many=True)  # Сериализуем все связанные изображения
+    documents = DocumentsSerializer(many=True)  # Сериализуем все связанные документы
+
+    class Meta:
+        model = Message
+        fields = ['id', 'text', 'created_at', 'user', 'images', 'documents']  # Только необходимые поля
 
 class MessageSerializer(serializers.ModelSerializer):
     created_at_formatted = serializers.SerializerMethodField()
     user = UserSerializer()
+    images = PhotoSerializer(many=True)  # Вложенные изображения
+    documents = DocumentsSerializer(many=True)  # Вложенные документы
+    reply_to = ReplyToSerializer()
 
     class Meta:
         model = Message
-        exсlude = []
         fields = '__all__'
         depth = 1
 

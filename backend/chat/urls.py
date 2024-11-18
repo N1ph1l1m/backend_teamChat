@@ -14,6 +14,7 @@ urlpatterns = [
     path('room/message/',views.MessageListView.as_view()),
     path('photo-upload/', views.PhotoUploads.as_view()),
     path('docs/', views.DocumentsList.as_view()),
+    path('photo/<int:pk>/', views.PhotoDetailView.as_view()),
     path('documents-upload/', views.DocumentsUploads.as_view()),
     path('room/message/<int:pk>', views.MessageDetailView.as_view()),
     path('docs/<int:pk>/<str:filename>/',views.DocumentDetail.as_view()),
