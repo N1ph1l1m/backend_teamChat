@@ -7,12 +7,12 @@ from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.http import HttpResponseRedirect, Http404, FileResponse
 from rest_framework import status, viewsets
-# from .serializers import RoomSerializer, MessageSerializer , MessageSerializerCreate , PhotoSerializer
+ # from .serializers import RoomSerializer, MessageSerializer , MessageSerializerCreate , PhotoSerializer
 from .serializers import *
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from django.contrib.auth import get_user_model
-from .models import  Room, Message, Photos , Documents
+from .models import  Room, Message, Photos , Documents  , ReactionToMessage
 from rest_framework.views import APIView
 import logging
 logger = logging.getLogger(__name__)
@@ -178,6 +178,20 @@ class MessageDetailView(generics.RetrieveAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
+class ReactionToMessageCreateView(generics.CreateAPIView):
+    queryset = ReactionToMessage.objects.all()
+    serializer_class = ReactionToMessageCreateSerializer
+
+class ReactionToMessageListView(generics.ListAPIView):
+    queryset = ReactionToMessage.objects.all()
+    serializer_class = ReactionToMessageSerializer
+
+class ReactionToMessageRetrieveView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ReactionToMessage.objects.all()
+    serializer_class = ReactionToMessageSerializer
+
+
+
 class PhotoUploads(generics.CreateAPIView):
     queryset = Photos.objects.all()
     serializer_class = PhotoSerializer
@@ -190,10 +204,6 @@ class DocumentsUploads(generics.CreateAPIView):
 class DocumentsList(generics.ListAPIView):
     queryset = Documents.objects.all()
     serializer_class = DocumentsSerializer
-
-
-
-
 
 class MessageViewSet(viewsets.ModelViewSet):
     queryset = Message.objects.all()

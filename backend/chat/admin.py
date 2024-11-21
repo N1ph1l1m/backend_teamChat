@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Message, Room, Photos, Documents
+from .models import Message, Room, Photos, Documents , ReactionToMessage
 
 # Register your models here.
 
@@ -27,6 +27,9 @@ class PhotoAdmin(admin.ModelAdmin):
 class DocumentAdmin(admin.ModelAdmin):
     list_display = ('id','document')
 
+class ReactionAdmin(admin.ModelAdmin):
+    list_display = ('id',"id_user", 'emoji')
+
 
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('id', 'room', 'user', 'text', 'created_at')  # Пример полей, отображаемых в админке
@@ -38,4 +41,5 @@ admin.site.register(Room, RoomAdmin)
 admin.site.register(Photos,PhotoAdmin)
 admin.site.register(Documents,DocumentAdmin)
 admin.site.register(Message, MessageAdmin)
+admin.site.register(ReactionToMessage, ReactionAdmin)
 

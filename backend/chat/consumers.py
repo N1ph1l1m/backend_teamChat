@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from .serializers import MessageSerializer, RoomSerializer, UserSerializer
 
 
-class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.ListModelMixin):
+class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.ListModelMixin  , mixins.UpdateModelMixin):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
     lookup_field = "pk"
@@ -35,136 +35,7 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
     async def leave_room(self, pk, **kwargs):
         await self.remove_user_from_room(pk)
 
-    # @action()
-    # async def create_message(self, message=None, image = None, **kwargs):
-    #     room: Room = await self.get_room(pk=self.room_subscribe)
-    #     await database_sync_to_async(Message.objects.create)(
-    #         room=room,
-    #         user=self.scope["user"],
-    #         text=message,
-    #         image = image,
-    #     )
 
-    # @action()
-    # async def create_message(self, message=None, images=None, **kwargs):
-    #     room: Room = await self.get_room(pk=self.room_subscribe)
-    #     user = self.scope["user"]
-    #
-    #     # Проверка на дубликаты сообщений
-    #     last_message = await database_sync_to_async(
-    #         Message.objects.filter(room=room, user=user).order_by('-created_at').first
-    #     )()
-    #
-    #     if last_message and last_message.text == message and last_message.images == images:
-    #         # Сообщение уже создано
-    #         return
-    #
-    #     # Создаем новое сообщение
-    #     await database_sync_to_async(Message.objects.create)(
-    #         room=room,
-    #         user=user,
-    #         text=message,
-    #         images=images,
-    #     )
-
-    # @action()
-    # async def create_message(self, message=None, images=None, **kwargs):
-    #     room: Room = await self.get_room(pk=self.room_subscribe)
-    #     user = self.scope["user"]
-    #
-    #     # Проверка на дубликаты сообщений
-    #     last_message = await database_sync_to_async(
-    #         Message.objects.filter(room=room, user=user).order_by('-created_at').first
-    #     )()
-    #
-    #     if last_message and last_message.text == message and list(last_message.images.all()) == images:
-    #         # Сообщение уже создано
-    #         return
-    #
-    #     # Создаем новое сообщение без изображений
-    #     new_message = await database_sync_to_async(Message.objects.create)(
-    #         room=room,
-    #         user=user,
-    #         text=message,
-    #     )
-    #
-    #     # Присоединяем изображения к сообщению
-    #     if images:
-    #         processed_images = []
-    #         for img in images:
-    #             # Находим объект Photos по изображению
-    #             photo = await database_sync_to_async(Photos.objects.get)(image=img)
-    #             processed_images.append(photo)
-    #
-    #         # Добавляем изображения к сообщению
-    #         await database_sync_to_async(new_message.images.set)(processed_images)
-
-    # @action()
-    # async def create_message(self, message=None, images=None, **kwargs):
-    #     room: Room = await self.get_room(pk=self.room_subscribe)
-    #     user = self.scope["user"]
-    #
-    #     # Проверка на дубликаты сообщений
-    #     last_message = await database_sync_to_async(
-    #         Message.objects.filter(room=room, user=user).order_by('-created_at').first
-    #     )()
-    #
-    #     if last_message:
-    #         last_message_images = await database_sync_to_async(lambda: list(last_message.images.all()))()
-    #         if last_message.text == message and last_message_images == images:
-    #             # Сообщение уже создано
-    #             return
-    #
-    #     # Создаем новое сообщение без изображений
-    #     new_message = await database_sync_to_async(Message.objects.create)(
-    #         room=room,
-    #         user=user,
-    #         text=message,
-    #     )
-    #
-    #     # Добавляем изображения после создания сообщения
-    #     if images:
-    #         # Предполагаем, что 'images' - это список ID фотографий
-    #         photos = await database_sync_to_async(Photos.objects.filter)(id__in=images)
-    #         await database_sync_to_async(new_message.images.set)(photos)
-
-    # @action()
-    # async def create_message(self, message=None, images=None, documents = None ,  **kwargs):
-    #     room: Room = await self.get_room(pk=self.room_subscribe)
-    #     user = self.scope["user"]
-    #
-    #     # Проверка на дубликаты сообщений
-    #     last_message = await database_sync_to_async(
-    #         Message.objects.filter(room=room, user=user).order_by('-created_at').first
-    #     )()
-    #
-    #     if last_message:
-    #         last_message_images = await database_sync_to_async(lambda: list(last_message.images.all()))()
-    #         if last_message.text == message and last_message_images == images:
-    #             return
-    #
-    #     if last_message:
-    #         last_message_documents = await database_sync_to_async(lambda: list(last_message.documents.all()))()
-    #         if last_message.text == message and last_message_documents == documents:
-    #             return
-    #
-    #     # Создаем новое сообщение
-    #     new_message = await database_sync_to_async(Message.objects.create)(
-    #         room=room,
-    #         user=user,
-    #         text=message,
-    #     )
-    #
-    #     # Если есть изображения, добавляем их
-    #     if images:
-    #         # Предполагаем, что 'images' - это список ID фотографий
-    #         photos = await database_sync_to_async(lambda: Photos.objects.filter(id__in=images))()
-    #         await database_sync_to_async(new_message.images.set)(photos)
-    #
-    #     if documents:
-    #         # Предполагаем, что 'images' - это список ID фотографий
-    #         document = await database_sync_to_async(lambda: Documents.objects.filter(id__in=documents))()
-    #         await database_sync_to_async(new_message.documents.set)(document)
 
     @action()
     async def create_message(self, message=None, images=None, documents=None, reply_to=None, **kwargs):
@@ -212,6 +83,8 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
             # Предполагаем, что 'documents' - это список ID документов
             docs = await database_sync_to_async(lambda: Documents.objects.filter(id__in=documents))()
             await database_sync_to_async(new_message.documents.set)(docs)
+
+
 
         # Возвращаем информацию о созданном сообщении
         return {

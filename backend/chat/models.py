@@ -40,10 +40,18 @@ class Documents(models.Model):
 
 
 
+class ReactionToMessage(models.Model):
+    id_user = models.ForeignKey(User, on_delete=models.CASCADE)
+    emoji = models.CharField(max_length=10,blank=True,null=True)
+    def __str__(self):
+        return f"Reaction({self.id_user}, {self.emoji})"
+
+
 class Message(models.Model):
     room = models.ForeignKey("chat.Room", on_delete=models.CASCADE, related_name="message")
     text = models.TextField(max_length=5000, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
+    reactions = models.ManyToManyField(ReactionToMessage, related_name="reactions_to_message")
     created_at = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField(Photos, related_name="photos", blank=True)
     documents = models.ManyToManyField(Documents, related_name="documents", blank=True)
@@ -54,6 +62,4 @@ class Message(models.Model):
     def __str__(self):
         reply_info = f" (reply to {self.reply_to.id})" if self.reply_to else ""
         return f"Message({self.user}, {self.room}, {self.text[:20]}{reply_info})"
-
-
 
