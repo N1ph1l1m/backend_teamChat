@@ -170,6 +170,10 @@ class MessageListView(generics.ListAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
+class MessageUpdateReactions(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
 class PhotoDetailView(generics.RetrieveAPIView):
     queryset = Photos.objects.all()
     serializer_class = PhotoSerializer

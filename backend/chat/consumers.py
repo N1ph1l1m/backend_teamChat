@@ -163,3 +163,13 @@ class UserConsumer(
 ):
     queryset = get_user_model().objects.all()
     serializer_class = UserSerializer
+
+class MessageConsumer(mixins.ListModelMixin,
+        mixins.RetrieveModelMixin,
+        mixins.PatchModelMixin,
+        mixins.UpdateModelMixin,
+        mixins.CreateModelMixin,
+        mixins.DeleteModelMixin,
+        GenericAsyncAPIConsumer):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
