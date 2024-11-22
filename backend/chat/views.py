@@ -170,9 +170,52 @@ class MessageListView(generics.ListAPIView):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
 
-class MessageUpdateReactions(generics.RetrieveUpdateDestroyAPIView):
+# class MessageUpdateReactions(generics.UpdateAPIView):
+#     queryset = Message.objects.all()
+#     serializer_class = MessageUpdateSerializer
+
+
+# class MessageUpdateReactions(generics.UpdateAPIView):
+#     queryset = Message.objects.all()
+#     serializer_class = MessageUpdateSerializer
+#
+#     def update(self, request, *args, **kwargs):
+#         partial = kwargs.pop('partial', False)
+#         instance = self.get_object()
+#         serializer = self.get_serializer(instance, data=request.data, partial=partial)
+#         serializer.is_valid(raise_exception=True)
+#
+#         # Обновляем поле reactions через метод add()
+#         reactions_data = request.data.get("reactions", [])
+#         for reaction_id in reactions_data:
+#             reaction_instance = ReactionToMessage.objects.get(id=reaction_id["id"])
+#             instance.reactions.add(reaction_instance)
+#
+#         instance.save()
+#
+#         return Response(serializer.data)
+
+
+class MessageUpdateReactions(generics.UpdateAPIView):
     queryset = Message.objects.all()
-    serializer_class = MessageSerializer
+    serializer_class = MessageUpdateSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+
+        # Обновляем поле reactions через метод add()
+        reaction_ids = request.data.get("reactions", [])  # Здесь список чисел
+        for reaction_id in reaction_ids:
+            reaction_instance = ReactionToMessage.objects.get(id=reaction_id)
+            instance.reactions.add(reaction_instance)
+
+        instance.save()
+
+        return Response(serializer.data)
+
 
 class PhotoDetailView(generics.RetrieveAPIView):
     queryset = Photos.objects.all()

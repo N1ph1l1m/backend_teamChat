@@ -84,7 +84,7 @@ class ReactionToMessageCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'emoji', 'id_user']
 
 class ReactionToMessageSerializer(serializers.ModelSerializer):
-    id_user = UserReactionSererializer()
+    # id_user = UserReactionSererializer()
     class Meta:
         model = ReactionToMessage
         fields = ['id', 'emoji', 'id_user']
@@ -108,6 +108,22 @@ class MessageSerializer(serializers.ModelSerializer):
     def get_created_at_formatted(self, obj:Message):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
+
+# class MessageUpdateSerializer(serializers.ModelSerializer):
+#     created_at_formatted = None  # Удаляем это поле из серилизатора
+#     class Meta:
+#         model = Message
+#         exclude = ["user", "images", "reply_to", "room", "documents", "text", "created_at"]
+#         depth = 1
+
+class MessageUpdateSerializer(serializers.ModelSerializer):
+    reactions = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=ReactionToMessage.objects.all()
+    )
+
+    class Meta:
+        model = Message
+        fields = ['id', 'reactions']
 
 
 class RoomSerializer(serializers.ModelSerializer):
