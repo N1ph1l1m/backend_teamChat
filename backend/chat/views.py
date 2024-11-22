@@ -206,15 +206,28 @@ class MessageUpdateReactions(generics.UpdateAPIView):
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
-        # Обновляем поле reactions через метод add()
-        reaction_ids = request.data.get("reactions", [])  # Здесь список чисел
+        # Получаем реакции из запроса
+        reaction_ids = request.data.get("reactions", [])
         for reaction_id in reaction_ids:
-            reaction_instance = ReactionToMessage.objects.get(id=reaction_id)
-            instance.reactions.add(reaction_instance)
+            try:
+                reaction_instance = ReactionToMessage.objects.get(id=reaction_id)
+
+                # Проверяем, есть ли у этого пользователя реакция в сообщении
+                existing_reaction = instance.reactions.filter(id_user=reaction_instance.id_user).first()
+                if existing_reaction:
+                    # Удаляем старую реакцию
+                    instance.reactions.remove(existing_reaction)
+
+                # Добавляем новую реакцию
+                instance.reactions.add(reaction_instance)
+            except ReactionToMessage.DoesNotExist:
+                return Response({"error": f"Reaction with id {reaction_id} does not exist."}, status=400)
 
         instance.save()
 
-        return Response(serializer.data)
+        # Сериализуем обновленное сообщение
+        response_serializer = self.get_serializer(instance)
+        return Response(response_serializer.data)
 
 
 class PhotoDetailView(generics.RetrieveAPIView):
