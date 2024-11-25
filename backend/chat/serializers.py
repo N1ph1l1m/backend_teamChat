@@ -84,7 +84,7 @@ class ReactionToMessageCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'emoji', 'id_user']
 
 class ReactionToMessageSerializer(serializers.ModelSerializer):
-    # id_user = UserReactionSererializer()
+    id_user = UserReactionSererializer()
     class Meta:
         model = ReactionToMessage
         fields = ['id', 'emoji', 'id_user']

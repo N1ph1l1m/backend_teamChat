@@ -242,6 +242,10 @@ class ReactionToMessageCreateView(generics.CreateAPIView):
     queryset = ReactionToMessage.objects.all()
     serializer_class = ReactionToMessageCreateSerializer
 
+class ReactionToMessageDeleteView(generics.DestroyAPIView):
+    queryset = ReactionToMessage.objects.all()
+    serializer_class = ReactionToMessageCreateSerializer
+
 class ReactionToMessageListView(generics.ListAPIView):
     queryset = ReactionToMessage.objects.all()
     serializer_class = ReactionToMessageSerializer

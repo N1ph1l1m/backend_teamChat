@@ -9,7 +9,7 @@ from djangochannelsrestframework.observer.generics import (ObserverModelInstance
 from djangochannelsrestframework.observer import model_observer
 from rest_framework import request
 
-from .models import Room, Message, Photos , Documents
+from .models import Room, Message, Photos , Documents , ReactionToMessage
 from django.contrib.auth import get_user_model
 from .serializers import MessageSerializer, RoomSerializer, UserSerializer
 
@@ -94,6 +94,90 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
             "user": new_message.user.username,
             "room": new_message.room.name,
             "created_at": new_message.created_at.isoformat(),
+        }
+
+    @action()
+    async def update_message_reactions(self, message_id=None, reaction_id=None, **kwargs):
+        user = self.scope["user"]
+        room: Room = await self.get_room(pk=self.room_subscribe)
+
+        # Проверяем, существует ли сообщение
+        existing_message = await database_sync_to_async(Message.objects.filter(id=message_id, room=room).first)()
+        if not existing_message:
+            return {"error": "Message not found"}
+
+        # Получаем реакцию из базы данных
+        reaction = await database_sync_to_async(ReactionToMessage.objects.filter(id=reaction_id).first)()
+        if not reaction:
+            return {"error": "Reaction not found"}
+
+        # Проверяем, существует ли уже реакция от текущего пользователя
+        existing_reaction = await database_sync_to_async(existing_message.reactions.filter(id_user=user).first)()
+        if existing_reaction:
+            # Удаляем старую реакцию
+            await database_sync_to_async(existing_message.reactions.remove)(existing_reaction)
+
+        # Добавляем новую реакцию
+        await database_sync_to_async(existing_message.reactions.add)(reaction)
+
+        # Сохраняем изменения
+        await database_sync_to_async(existing_message.save)()
+
+        # Получаем все реакции
+        reactions = await database_sync_to_async(lambda: list(existing_message.reactions.all()))()
+
+        # Формируем список реакций
+        reaction_list = []
+        for r in reactions:
+            username = await database_sync_to_async(lambda: r.id_user.username)()
+            reaction_list.append({"reaction_id": r.id, "user": username})
+
+        # Возвращаем обновлённое сообщение
+        return {
+            "message_id": existing_message.id,
+            "reactions": reaction_list,
+            "created_at": existing_message.created_at.isoformat(),  # Используем существующее поле
+        }
+
+    @action()
+    async def delete_reaction(self, message_id=None, reaction_id=None, **kwargs):
+        user = self.scope["user"]  # Получаем текущего пользователя
+        room = await self.get_room(pk=self.room_subscribe)  # Получаем комнату
+
+        # Проверяем, существует ли сообщение
+        message = await sync_to_async(Message.objects.filter(id=message_id, room=room).first)()
+        if not message:
+            return {"error": "Message not found"}
+
+        # Проверяем, существует ли реакция
+        reaction = await sync_to_async(ReactionToMessage.objects.filter(id=reaction_id).first)()
+        if not reaction:
+            return {"error": "Reaction not found"}
+
+        # Удаляем реакцию из сообщения
+        await sync_to_async(message.reactions.remove)(reaction)
+
+        # Сохраняем изменения
+        await sync_to_async(message.save)()
+
+        # Получаем обновлённый список реакций
+        reactions = await sync_to_async(lambda: list(message.reactions.all()))()
+
+        # Формируем список обновленных реакций
+        reaction_list = []
+        for r in reactions:
+            username = await sync_to_async(lambda: r.id_user.username)()
+            reaction_list.append({
+                "reaction_id": r.id,
+                "emoji": r.emoji,
+                "user": username
+            })
+
+        # Возвращаем обновлённые данные о сообщении
+        return {
+            "message_id": message.id,
+            "reactions": reaction_list,
+            "created_at": message.created_at.isoformat(),
         }
 
     @action()
