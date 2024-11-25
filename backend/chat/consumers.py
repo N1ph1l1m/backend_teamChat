@@ -180,6 +180,8 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
             "created_at": message.created_at.isoformat(),
         }
 
+
+
     @action()
     async def subscribe_to_messages_in_room(self, pk, **kwargs):
         await self.message_activity.subscribe(room=pk)
