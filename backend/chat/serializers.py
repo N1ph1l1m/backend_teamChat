@@ -1,4 +1,4 @@
-from chat.models import Room, Message, Photos , Documents , ReactionToMessage
+from chat.models import Room, Message, Photos , Documents , ReactionToMessage , ForwardedMessage
 from django.contrib.auth import get_user_model
 from users.models import User
 from rest_framework import serializers
@@ -90,6 +90,34 @@ class ReactionToMessageSerializer(serializers.ModelSerializer):
         fields = ['id', 'emoji', 'id_user']
 
 
+class MessageSerializer2(serializers.ModelSerializer):
+    created_at_formatted = serializers.SerializerMethodField()
+    user = UserSerializer()
+    images = PhotoSerializer(many=True)
+    documents = DocumentsSerializer(many=True)
+    reply_to = ReplyToSerializer()
+    reactions = ReactionToMessageSerializer(many=True)
+    # forwarded_messages = ForwardedMessageSerializer(many=True)
+
+    class Meta:
+        model = Message
+        fields = '__all__'
+        depth = 1
+
+    def get_created_at_formatted(self, obj:Message):
+        return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+
+
+class ForwardedMessageSerializer(serializers.ModelSerializer):
+    original_message = MessageSerializer2()
+    #forwarded_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    forwarded_by = UserSerializer()
+    forwarded_to_room = serializers.PrimaryKeyRelatedField(queryset=Room.objects.all())
+    forwarded_at = serializers.DateTimeField()
+
+    class Meta:
+        model = ForwardedMessage
+        fields = ['id', 'original_message', 'forwarded_by', 'forwarded_to_room', 'forwarded_at']
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -99,6 +127,7 @@ class MessageSerializer(serializers.ModelSerializer):
     documents = DocumentsSerializer(many=True)
     reply_to = ReplyToSerializer()
     reactions = ReactionToMessageSerializer(many=True)
+    forwarded_messages = ForwardedMessageSerializer(many=True)
 
     class Meta:
         model = Message

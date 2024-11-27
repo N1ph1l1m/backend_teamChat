@@ -12,7 +12,7 @@ from .serializers import *
 from rest_framework import generics
 from rest_framework.generics import ListAPIView
 from django.contrib.auth import get_user_model
-from .models import  Room, Message, Photos , Documents  , ReactionToMessage
+from .models import  Room, Message, Photos , Documents  , ReactionToMessage , ForwardedMessage
 from rest_framework.views import APIView
 import logging
 logger = logging.getLogger(__name__)
@@ -307,3 +307,32 @@ def room(request, pk):
 
 def test(request):
     return render(request, 'chat/test.html')
+
+class ForwardMessagesList(generics.ListAPIView):
+    queryset = ForwardedMessage.objects.all()
+    serializer_class = ForwardedMessageSerializer
+class ForwardMessagesView(APIView):
+    def post(self, request):
+        user = request.user # Текущий пользователь
+        room_id = request.data.get("room_id")
+        message_ids = request.data.get("message_ids")  # Список ID сообщений
+
+        if not room_id or not message_ids:
+            return Response({"error": "room_id and message_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Проверяем, существует ли комната
+        room = get_object_or_404(Room, id=room_id)
+
+        # Получаем сообщения
+        messages = Message.objects.filter(id__in=message_ids)
+
+        if not messages.exists():
+            return Response({"error": "No valid messages found."}, status=status.HTTP_404_NOT_FOUND)
+
+        # Пересылаем сообщения
+        forwarded_messages = Message.forward_multiple_messages(user=user, room=room, messages=messages)
+
+        return Response({
+            "message": "Messages forwarded successfully",
+            "forwarded_message_ids": [msg.id for msg in forwarded_messages]
+        }, status=status.HTTP_201_CREATED)

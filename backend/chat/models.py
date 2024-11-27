@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from users.models import User
 import os
+from django.db import transaction
 
 class Room(models.Model):
     name = models.CharField(max_length=255, null=False, blank=True, unique = True)
@@ -47,19 +48,39 @@ class ReactionToMessage(models.Model):
         return f"Reaction({self.id_user}, {self.emoji})"
 
 
+class ForwardedMessage(models.Model):
+    original_message = models.ForeignKey(
+        "Message", on_delete=models.CASCADE, related_name="forwarded_messages_from", blank=True
+    )
+    forwarded_by = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="forwarded_by_user"
+    )
+    forwarded_to_room = models.ForeignKey(
+        Room, on_delete=models.CASCADE, related_name="forwarded_to_room"
+    )
+    forwarded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"ForwardedMessage(from {self.original_message.id} to {self.forwarded_to_room.name})"
+
+
 class Message(models.Model):
     room = models.ForeignKey("chat.Room", on_delete=models.CASCADE, related_name="message")
     text = models.TextField(max_length=5000, blank=True, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="messages")
-    reactions = models.ManyToManyField(ReactionToMessage, related_name="reactions_to_message")
+    reactions = models.ManyToManyField(ReactionToMessage, related_name="reactions_to_message" , blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     images = models.ManyToManyField(Photos, related_name="photos", blank=True)
     documents = models.ManyToManyField(Documents, related_name="documents", blank=True)
     reply_to = models.ForeignKey(
         'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies'
     )
+    forwarded_messages = models.ManyToManyField(ForwardedMessage,  related_name='forwarded_to_messages', blank=True)
+
 
     def __str__(self):
         reply_info = f" (reply to {self.reply_to.id})" if self.reply_to else ""
         return f"Message({self.user}, {self.room}, {self.text[:20]}{reply_info})"
+
+
 
