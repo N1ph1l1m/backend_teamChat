@@ -108,6 +108,11 @@ class MessageSerializer2(serializers.ModelSerializer):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
+class ForwardedCreate(serializers.ModelSerializer):
+    class Meta:
+        model = ForwardedMessage
+        fields = '__all__'
+
 class ForwardedMessageSerializer(serializers.ModelSerializer):
     original_message = MessageSerializer2()
     #forwarded_by = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())

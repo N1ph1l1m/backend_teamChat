@@ -311,28 +311,36 @@ def test(request):
 class ForwardMessagesList(generics.ListAPIView):
     queryset = ForwardedMessage.objects.all()
     serializer_class = ForwardedMessageSerializer
-class ForwardMessagesView(APIView):
-    def post(self, request):
-        user = request.user # Текущий пользователь
-        room_id = request.data.get("room_id")
-        message_ids = request.data.get("message_ids")  # Список ID сообщений
 
-        if not room_id or not message_ids:
-            return Response({"error": "room_id and message_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
+class ForwardMessageCreate(generics.CreateAPIView):
+    queryset = ForwardedMessage.objects.all()
+    serializer_class = ForwardedCreate
 
-        # Проверяем, существует ли комната
-        room = get_object_or_404(Room, id=room_id)
-
-        # Получаем сообщения
-        messages = Message.objects.filter(id__in=message_ids)
-
-        if not messages.exists():
-            return Response({"error": "No valid messages found."}, status=status.HTTP_404_NOT_FOUND)
-
-        # Пересылаем сообщения
-        forwarded_messages = Message.forward_multiple_messages(user=user, room=room, messages=messages)
-
-        return Response({
-            "message": "Messages forwarded successfully",
-            "forwarded_message_ids": [msg.id for msg in forwarded_messages]
-        }, status=status.HTTP_201_CREATED)
+# class ForwardMessagesView(APIView):
+#     def post(self, request):
+#         user_id = request.data.get("user")  # Получаем ID пользователя
+#         room_id = request.data.get("room_id")
+#         message_ids = request.data.get("message_ids")  # Список ID сообщений
+#
+#         if not user_id or not room_id or not message_ids:
+#             return Response({"error": "user, room_id, and message_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
+#
+#         # Проверяем, существует ли пользователь
+#         user = get_object_or_404(User, id=user_id)
+#
+#         # Проверяем, существует ли комната
+#         room = get_object_or_404(Room, id=room_id)
+#
+#         # Получаем сообщения
+#         messages = Message.objects.filter(id__in=message_ids)
+#
+#         if not messages.exists():
+#             return Response({"error": "No valid messages found."}, status=status.HTTP_404_NOT_FOUND)
+#
+#         # Пересылаем сообщения
+#         forwarded_messages = Message.forward_multiple_messages(user=user, room=room, messages=messages)
+#
+#         return Response({
+#             "message": "Messages forwarded successfully",
+#             "forwarded_message_ids": [msg.id for msg in forwarded_messages]
+#         }, status=status.HTTP_201_CREATED)

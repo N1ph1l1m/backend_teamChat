@@ -77,6 +77,24 @@ class Message(models.Model):
     )
     forwarded_messages = models.ManyToManyField(ForwardedMessage,  related_name='forwarded_to_messages', blank=True)
 
+    @staticmethod
+    @transaction.atomic
+    def forward_multiple_messages(user, room, messages):
+        forwarded_messages = []
+
+        for message in messages:
+            forwarded_message = Message.objects.create(
+                text=message.text,
+                user=user,
+                room=room,
+                reply_to=message.reply_to,
+            )
+            # Переносим связанные объекты, если нужно
+            forwarded_message.images.set(message.images.all())
+            forwarded_message.documents.set(message.documents.all())
+            forwarded_messages.append(forwarded_message)
+
+        return forwarded_messages
 
     def __str__(self):
         reply_info = f" (reply to {self.reply_to.id})" if self.reply_to else ""
