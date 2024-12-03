@@ -143,6 +143,26 @@ class MessageSerializer(serializers.ModelSerializer):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
+class CreateMessageSerializer(serializers.ModelSerializer):
+    room = serializers.PrimaryKeyRelatedField(
+         queryset=Room.objects.all()
+    )
+    user = serializers.PrimaryKeyRelatedField(
+         queryset=User.objects.all())
+    forwarded_messages = serializers.PrimaryKeyRelatedField(many=True,
+         queryset=ForwardedMessage.objects.all())
+
+    created_at_formatted = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Message
+        fields = ['room', 'user','forwarded_messages' , 'created_at_formatted']
+        depth = 1
+
+    def get_created_at_formatted(self, obj:Message):
+        return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
+
+
 # class MessageUpdateSerializer(serializers.ModelSerializer):
 #     created_at_formatted = None  # Удаляем это поле из серилизатора
 #     class Meta:

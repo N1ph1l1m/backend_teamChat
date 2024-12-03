@@ -15,6 +15,7 @@ urlpatterns = [
     path('photo-upload/', views.PhotoUploads.as_view()),
     path('docs/', views.DocumentsList.as_view()),
     path('message/<int:pk>/',views.MessageUpdateReactions.as_view()),
+    path('message-create/',views.MessageCreate.as_view()),
     path('photo/<int:pk>/', views.PhotoDetailView.as_view()),
     path('reaction/',views.ReactionToMessageCreateView.as_view()),
     path('reaction/destroy/<int:pk>/',views.ReactionToMessageDeleteView.as_view()),

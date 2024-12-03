@@ -97,8 +97,6 @@ class Message(models.Model):
         return forwarded_messages
 
     def __str__(self):
-        reply_info = f" (reply to {self.reply_to.id})" if self.reply_to else ""
-        return f"Message({self.user}, {self.room}, {self.text[:20]}{reply_info})"
-
-
-
+        user = self.user.username if self.user else "Unknown User"
+        room = self.room.name if self.room else "Unknown Room"
+        return f"Message from {user} in room {room}"

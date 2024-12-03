@@ -316,6 +316,10 @@ class ForwardMessageCreate(generics.CreateAPIView):
     queryset = ForwardedMessage.objects.all()
     serializer_class = ForwardedCreate
 
+class MessageCreate(generics.CreateAPIView):
+    queryset = Message.objects.all()
+    serializer_class = CreateMessageSerializer
+
 # class ForwardMessagesView(APIView):
 #     def post(self, request):
 #         user_id = request.data.get("user")  # Получаем ID пользователя
