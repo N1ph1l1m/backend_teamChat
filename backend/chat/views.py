@@ -195,6 +195,10 @@ class MessageListView(generics.ListAPIView):
 #
 #         return Response(serializer.data)
 
+class MessageDetail(generics.RetrieveAPIView):
+    queryset = Message.objects.all()
+    serializer_class = MessageSerializer
+
 
 class MessageUpdateReactions(generics.UpdateAPIView):
     queryset = Message.objects.all()
@@ -309,6 +313,10 @@ def test(request):
     return render(request, 'chat/test.html')
 
 class ForwardMessagesList(generics.ListAPIView):
+    queryset = ForwardedMessage.objects.all()
+    serializer_class = ForwardedMessageSerializer
+
+class ForwardMessagesDetail(generics.RetrieveAPIView):
     queryset = ForwardedMessage.objects.all()
     serializer_class = ForwardedMessageSerializer
 

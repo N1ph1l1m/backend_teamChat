@@ -8,6 +8,7 @@ class Room(models.Model):
     name = models.CharField(max_length=255, null=False, blank=True, unique = True)
     host = models.ForeignKey(User, on_delete=models.CASCADE, related_name= "rooms")
     current_users = models.ManyToManyField(User,related_name="current_rooms", blank = True)
+    photo_room = models.ImageField(upload_to="users/%Y/%m/%d", blank=True, null=True, verbose_name="Фотография", default="users/default_groupChat.png")
 
     def __str__(self):
         return f"Room({self.name}{self.host})"

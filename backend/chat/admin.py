@@ -10,14 +10,14 @@ class RoomAdmin(admin.ModelAdmin):
 
     # Определите, какие поля показывать на странице изменения модели
     fieldsets = (
-        (None, {'fields': ('name', 'host', 'current_users')}),  # Убедитесь, что все поля корректны
+        (None, {'fields': ('name', 'host', 'current_users' , 'photo_room')}),  # Убедитесь, что все поля корректны
     )
     
     # Поля, отображаемые на форме создания/изменения модели
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
-            'fields': ('name', 'host', 'current_users'),
+            'fields': ('name', 'host', 'current_users' , 'photo_room'),
         }),
     )
 
