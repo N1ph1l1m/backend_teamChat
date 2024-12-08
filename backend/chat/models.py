@@ -77,6 +77,9 @@ class Message(models.Model):
         'self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies'
     )
     forwarded_messages = models.ManyToManyField(ForwardedMessage,  related_name='forwarded_to_messages', blank=True)
+    is_read =  models.BooleanField(default=False)
+    read_by = models.ManyToManyField(User,related_name="read_messages",blank=True)
+    read_at = models.DateTimeField(null=True,blank=True)
 
     @staticmethod
     @transaction.atomic
