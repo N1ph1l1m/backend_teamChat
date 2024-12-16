@@ -179,6 +179,13 @@ class MessageUpdateSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'reactions']
 
+class MessageUpdateReadStatusSerializer(serializers.ModelSerializer):
+
+
+    class Meta:
+        model = Message
+        fields = ['id', 'is_read']
+
 
 class RoomSerializer(serializers.ModelSerializer):
     last_message = serializers.SerializerMethodField()
