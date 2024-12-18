@@ -194,7 +194,7 @@ class RoomSerializer(serializers.ModelSerializer):
     current_users = UserSerializer(many=True, read_only=True)
     class Meta:
         model = Room
-        fields = ["pk", "name",  "photo_room" , "host" , "current_users" ,"message","last_message"]
+        fields = ["pk", "last_message" , "name",  "photo_room" , "host" , "current_users" ,"message",]
         depth = 1
         read_only_fields = ["message", "last_message"]
 

@@ -209,49 +209,34 @@ class MessageUpdateReadMessage(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MessageReadAll(APIView):
-    """
-    Класс для отметки всех сообщений пользователя как прочитанные.
-    """
+
 
     def post(self, request, user_id, *args, **kwargs):
-        # Если пользователь не аутентифицирован, обрабатывать как анонимного
-        if not request.user or not request.user.is_authenticated:
-            # Здесь вы можете либо разрешить выполнение, либо вернуть ошибку
-            # Например, разрешить выполнение:
-            user = None
-        else:
-            user = request.user
-
-        # Проверяем, что пользователь пытается обновить свои собственные сообщения
-        if user and user.id != user_id:
-            return Response(
-                {"error": "You can only mark your own messages as read."},
-                status=status.HTTP_403_FORBIDDEN
-            )
-
         try:
-            # Выбираем сообщения пользователя
             unread_messages = Message.objects.filter(
-                Q(room__message__user_id=user_id) & Q(is_read=False)
+                room__current_users__id=user_id, is_read=False
             )
+
+            if not unread_messages.exists():
+                return Response(
+                    {"error": "No unread messages found for this user."},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
             # Обновляем статус
             unread_messages.update(is_read=True, read_at=now())
-
-            # Если пользователь аутентифицирован, обновляем поле `read_by`
-            if user:
-                for message in unread_messages:
-                    message.read_by.add(user)
 
             return Response(
                 {"detail": f"{unread_messages.count()} messages marked as read."},
                 status=status.HTTP_200_OK
             )
-        except Message.DoesNotExist:
+
+        except Exception as e:
             return Response(
-                {"error": "No unread messages found for this user."},
-                status=status.HTTP_404_NOT_FOUND
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
 
 class MessageUpdateReactions(generics.UpdateAPIView):
     queryset = Message.objects.all()
