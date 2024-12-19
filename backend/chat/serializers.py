@@ -21,11 +21,11 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
-class UserSer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ['id','username' , "photo"]
-
+# class UserSer(serializers.ModelSerializer):
+#     class Meta:
+#         model = User
+#         fields = ['id','username' , "photo"]
+#
 
 
 class PhotoSerializer(serializers.ModelSerializer):
@@ -39,12 +39,12 @@ class DocumentsSerializer(serializers.ModelSerializer):
         fields = ['id','document', 'name' , 'upload_at']
 
 
-class MultiplePhotoSerializer(serializers.Serializer):
-    images = serializers.ListField(child=serializers.ImageField())
-
-
-class MultipleDocumentSerializer(serializers.Serializer):
-    images = serializers.ListField(child=serializers.FileField())
+# class MultiplePhotoSerializer(serializers.Serializer):
+#     images = serializers.ListField(child=serializers.ImageField())
+#
+#
+# class MultipleDocumentSerializer(serializers.Serializer):
+#     images = serializers.ListField(child=serializers.FileField())
 
 
 class MessageSerializerCreate2(serializers.ModelSerializer):
@@ -163,13 +163,6 @@ class CreateMessageSerializer(serializers.ModelSerializer):
         return obj.created_at.strftime("%d-%m-%Y  %H:%M:%S")
 
 
-# class MessageUpdateSerializer(serializers.ModelSerializer):
-#     created_at_formatted = None  # Удаляем это поле из серилизатора
-#     class Meta:
-#         model = Message
-#         exclude = ["user", "images", "reply_to", "room", "documents", "text", "created_at"]
-#         depth = 1
-
 class MessageUpdateSerializer(serializers.ModelSerializer):
     reactions = serializers.PrimaryKeyRelatedField(
         many=True, queryset=ReactionToMessage.objects.all()
@@ -200,6 +193,7 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj:Room):
         return MessageSerializer(obj.message.order_by('created_at').last()).data
+
 
 
 

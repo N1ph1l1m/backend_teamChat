@@ -209,34 +209,40 @@ class MessageUpdateReadMessage(generics.RetrieveUpdateDestroyAPIView):
 
 
 class MessageReadAll(APIView):
-
+    """
+    Класс для отметки всех сообщений пользователя как прочитанных.
+    """
 
     def post(self, request, user_id, *args, **kwargs):
         try:
+            # Фильтрация сообщений по ID пользователя и статусу прочтения
             unread_messages = Message.objects.filter(
-                room__current_users__id=user_id, is_read=False
+                user_id=user_id,  # Фильтрация по ID пользователя
+                is_read=False  # Только непрочитанные сообщения
             )
 
+            # Проверяем, есть ли непрочитанные сообщения
             if not unread_messages.exists():
                 return Response(
                     {"error": "No unread messages found for this user."},
                     status=status.HTTP_404_NOT_FOUND
                 )
 
-            # Обновляем статус
+            # Обновляем статус сообщений
             unread_messages.update(is_read=True, read_at=now())
 
+            # Возвращаем количество обновленных сообщений
             return Response(
                 {"detail": f"{unread_messages.count()} messages marked as read."},
                 status=status.HTTP_200_OK
             )
 
         except Exception as e:
+            # В случае ошибки возвращаем ошибку
             return Response(
                 {"error": str(e)},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-
 
 class MessageUpdateReactions(generics.UpdateAPIView):
     queryset = Message.objects.all()
