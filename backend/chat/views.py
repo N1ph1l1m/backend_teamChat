@@ -208,17 +208,46 @@ class MessageUpdateReadMessage(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = MessageUpdateReadStatusSerializer
 
 
+class MessageCheckRead(APIView):
+
+    def get(self, request, user_id, *args, **kwargs):
+        try:
+            # Ищем непрочитанные сообщения пользователя
+            unread_messages = Message.objects.filter(
+                user_id=user_id,
+                is_read=False
+            )
+
+            # Если непрочитанные сообщения есть, возвращаем их количество
+            if unread_messages.exists():
+                return Response(
+                    {"detail": f"User has {unread_messages.count()} unread messages.", "has_unread": True},
+                    status=status.HTTP_200_OK
+                )
+
+            # Если непрочитанных сообщений нет
+            return Response(
+                {"detail": "No unread messages.", "has_unread": False},
+                status=status.HTTP_200_OK
+            )
+
+        except Exception as e:
+            # Возвращаем ошибку в случае исключения
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
 class MessageReadAll(APIView):
-    """
-    Класс для отметки всех сообщений пользователя как прочитанных.
-    """
+
 
     def post(self, request, user_id, *args, **kwargs):
         try:
-            # Фильтрация сообщений по ID пользователя и статусу прочтения
+
             unread_messages = Message.objects.filter(
-                user_id=user_id,  # Фильтрация по ID пользователя
-                is_read=False  # Только непрочитанные сообщения
+                user_id=user_id,
+                is_read=False
             )
 
             # Проверяем, есть ли непрочитанные сообщения

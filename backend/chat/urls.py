@@ -18,6 +18,7 @@ urlpatterns = [
     path('message/<int:pk>/',views.MessageDetail.as_view()),
     path('message-create/',views.MessageCreate.as_view()),
     path('message-read/<int:pk>/',views.MessageUpdateReadMessage.as_view()),
+    path("message-read-status/<int:user_id>/",views.MessageCheckRead.as_view()),
     path('message-read-all/<int:user_id>/',views.MessageReadAll.as_view()),
     path('photo/<int:pk>/', views.PhotoDetailView.as_view()),
     path('reaction/',views.ReactionToMessageCreateView.as_view()),
