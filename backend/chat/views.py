@@ -6,6 +6,7 @@ from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.utils.timezone import now
+from rest_framework.authtoken.models  import Token
 from django.shortcuts import render, reverse, get_object_or_404
 from django.views.generic import TemplateView, ListView
 from django.http import HttpResponseRedirect, Http404, FileResponse
@@ -401,31 +402,6 @@ class MessageCreate(generics.CreateAPIView):
     queryset = Message.objects.all()
     serializer_class = CreateMessageSerializer
 
-# class ForwardMessagesView(APIView):
-#     def post(self, request):
-#         user_id = request.data.get("user")  # Получаем ID пользователя
-#         room_id = request.data.get("room_id")
-#         message_ids = request.data.get("message_ids")  # Список ID сообщений
-#
-#         if not user_id or not room_id or not message_ids:
-#             return Response({"error": "user, room_id, and message_ids are required."}, status=status.HTTP_400_BAD_REQUEST)
-#
-#         # Проверяем, существует ли пользователь
-#         user = get_object_or_404(User, id=user_id)
-#
-#         # Проверяем, существует ли комната
-#         room = get_object_or_404(Room, id=room_id)
-#
-#         # Получаем сообщения
-#         messages = Message.objects.filter(id__in=message_ids)
-#
-#         if not messages.exists():
-#             return Response({"error": "No valid messages found."}, status=status.HTTP_404_NOT_FOUND)
-#
-#         # Пересылаем сообщения
-#         forwarded_messages = Message.forward_multiple_messages(user=user, room=room, messages=messages)
-#
-#         return Response({
-#             "message": "Messages forwarded successfully",
-#             "forwarded_message_ids": [msg.id for msg in forwarded_messages]
-#         }, status=status.HTTP_201_CREATED)
+class TokenCheck(generics.ListAPIView):
+    queryset = Token.objects.all()
+    serializer_class = TokensUsers

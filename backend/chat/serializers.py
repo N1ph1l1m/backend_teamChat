@@ -1,6 +1,7 @@
 from chat.models import Room, Message, Photos , Documents , ReactionToMessage , ForwardedMessage
 from django.contrib.auth import get_user_model
 from users.models import User
+from rest_framework.authtoken.models  import Token
 from rest_framework import serializers
 
 class UserSerializer(serializers.ModelSerializer):
@@ -20,14 +21,6 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 
-
-# class UserSer(serializers.ModelSerializer):
-#     class Meta:
-#         model = User
-#         fields = ['id','username' , "photo"]
-#
-
-
 class PhotoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Photos
@@ -38,13 +31,6 @@ class DocumentsSerializer(serializers.ModelSerializer):
         model = Documents
         fields = ['id','document', 'name' , 'upload_at']
 
-
-# class MultiplePhotoSerializer(serializers.Serializer):
-#     images = serializers.ListField(child=serializers.ImageField())
-#
-#
-# class MultipleDocumentSerializer(serializers.Serializer):
-#     images = serializers.ListField(child=serializers.FileField())
 
 
 class MessageSerializerCreate2(serializers.ModelSerializer):
@@ -179,7 +165,6 @@ class MessageUpdateReadStatusSerializer(serializers.ModelSerializer):
         model = Message
         fields = ['id', 'is_read']
 
-
 class RoomSerializer(serializers.ModelSerializer):
     last_message = serializers.SerializerMethodField()
     message = MessageSerializer(many = True, read_only = True)
@@ -193,6 +178,13 @@ class RoomSerializer(serializers.ModelSerializer):
 
     def get_last_message(self, obj:Room):
         return MessageSerializer(obj.message.order_by('created_at').last()).data
+
+
+class TokensUsers(serializers.ModelSerializer):
+
+    class Meta:
+        model = Token
+        fields = "__all__"
 
 
 
