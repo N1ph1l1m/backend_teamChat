@@ -23,6 +23,9 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
         if hasattr(self, "room_subscribe"):
             await self.remove_user_from_room(self.room_subscribe)
             await self.notify_users()
+
+        # Удаляем глобальную подписку
+        await self.message_activity.unsubscribe()
         await super().disconnect(code)
 
     @action()
@@ -95,6 +98,10 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
             "room": new_message.room.name,
             "created_at": new_message.created_at.isoformat(),
         }
+
+    @action()
+    async def subscribe_to_global_notifications(self, **kwargs):
+        await self.message_activity.subscribe()
 
     @action()
     async def update_message_reactions(self, message_id=None, reaction_id=None, **kwargs):
@@ -192,13 +199,16 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
 
     @message_activity.groups_for_signal
     def message_activity(self, instance: Message, **kwargs):
-        yield f'room__{instance.room_id}'
-        yield f'pk__{instance.pk}'
+        yield f'room__{instance.room_id}'  # Группа для конкретной комнаты
+        yield f'pk__{instance.pk}'  # Группа для сообщения
+        yield 'global_notifications'  # Глобальная группа для всех подключений
 
     @message_activity.groups_for_consumer
     def message_activity(self, room=None, **kwargs):
         if room is not None:
             yield f'room__{room}'
+        # Добавляем группу для глобальных уведомлений
+        yield 'global_notifications'
 
     @message_activity.serializer
     def message_activity(self, instance: Message, action, **kwargs):

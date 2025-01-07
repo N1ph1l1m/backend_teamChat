@@ -41,7 +41,7 @@ def index(request):
 class RoomCreate(APIView):
     def post(self, request):
         current_user = request.user
-        other_user_username = request.data.get("current_users", [])  # Ожидается один пользователь
+        other_user_username = request.data.get("current_users", [])
 
         if not other_user_username:
             return Response({"error": "Other user is required"}, status=status.HTTP_400_BAD_REQUEST)
