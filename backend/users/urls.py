@@ -9,4 +9,5 @@ from . import views
 urlpatterns =[
     path("users/", views.UserList.as_view()),
     path("users/<int:pk>/", views.UserDetail.as_view()),
+    path("users/activity/<int:pk>/", views.UpdateLastActivity.as_view()),
 ]
