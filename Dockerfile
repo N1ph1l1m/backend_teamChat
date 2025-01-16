@@ -16,4 +16,4 @@ COPY . /app/
 EXPOSE 8000
 
 # Запускаем manage.py из директории backend
-CMD ["python", "manage.py", "runserver", "192.168.77.11:8000"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
