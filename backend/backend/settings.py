@@ -27,7 +27,7 @@ DEBUG = True
 FILE_UPLOAD_PERMISSIONS = 0o644
 FILE_CHARSET = 'utf-8'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["192.168.77.11"]
 
 
 # Application definition
