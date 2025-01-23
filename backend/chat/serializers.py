@@ -187,5 +187,8 @@ class TokensUsers(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class CreateTokensUsers(serializers.ModelSerializer):
 
-
+    class Meta:
+        model = Token
+        fields = "__all__"

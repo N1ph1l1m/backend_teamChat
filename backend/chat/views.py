@@ -1,7 +1,7 @@
 import json
 import os
 from fileinput import filename
-
+from rest_framework.authtoken.views import ObtainAuthToken
 from asgiref.sync import sync_to_async
 from django.contrib.auth import get_user_model
 from django.db.models import Q
@@ -405,3 +405,36 @@ class MessageCreate(generics.CreateAPIView):
 class TokenCheck(generics.ListAPIView):
     queryset = Token.objects.all()
     serializer_class = TokensUsers
+
+
+from rest_framework.authtoken.models import Token
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from django.contrib.auth.models import User
+from rest_framework.exceptions import NotFound
+
+class CustomAuthToken(APIView):
+
+    def post(self, request, *args, **kwargs):
+        # Получение имени пользователя из запроса
+        username = request.data.get('username')
+
+        if not username:
+            return Response({'error': 'Username is required'}, status=400)
+
+        User = get_user_model()
+        try:
+            # Поиск пользователя по имени
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
+            raise NotFound('User not found')
+
+        # Создание или получение токена
+        token, created = Token.objects.get_or_create(user=user)
+
+        # Формирование ответа
+        return Response({
+            'key': token.key,
+            'user': user.pk,
+            'created': token.created,
+        })

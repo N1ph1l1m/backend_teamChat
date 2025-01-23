@@ -33,6 +33,7 @@ urlpatterns = [
     path("forward/<int:pk>/", views.ForwardMessagesDetail.as_view()),
     path('docs/<int:pk>/<str:filename>/',views.DocumentDetail.as_view()),
     path("tokens/",views.TokenCheck.as_view()),
+    path("create-token/",views.CustomAuthToken.as_view()),
     # path('room/<int:pk>/create/message/', views.MessageViewSet.as_view({'post': 'create'})),
     # path('room/<int:id_room>/user/<str:sender_username>/message/', views.MessageViewSet.as_view({'post': 'create'})),
 
