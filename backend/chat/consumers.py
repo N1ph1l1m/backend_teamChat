@@ -40,6 +40,8 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
 
 
 
+
+
     @action()
     async def create_message(self, message=None, images=None, documents=None, reply_to=None, **kwargs):
         room: Room = await self.get_room(pk=self.room_subscribe)
@@ -89,15 +91,24 @@ class RoomConsumer(ObserverModelInstanceMixin, GenericAsyncAPIConsumer,  mixins.
 
 
 
-        # Возвращаем информацию о созданном сообщении
-        return {
+        response = {
             "message_id": new_message.id,
             "text": new_message.text,
             "reply_to": new_message.reply_to.id if new_message.reply_to else None,
             "user": new_message.user.username,
             "room": new_message.room.name,
             "created_at": new_message.created_at.isoformat(),
+    #         "images": await database_sync_to_async(
+    #     lambda: [{"id": img.id, "url": img.image.url} for img in new_message.images.all()]
+    # )(),
+
         }
+
+
+        await self.send_json({"action": "create_message", "data": response})
+        return response
+
+
 
     @action()
     async def subscribe_to_global_notifications(self, **kwargs):
